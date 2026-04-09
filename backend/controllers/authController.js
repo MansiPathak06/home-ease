@@ -2,13 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../config/db');
 
-// ─── IN authController.js, inside loginUser ──────────────────────────────────
-// After you verify the password is valid, ADD this check before generating token:
-
-
-// Then continue with token generation as normal...
-
-// Generate JWT Token
 const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
@@ -20,48 +13,38 @@ exports.loginUser = async (req, res) => {
 
     // Check if admin
     if (email === process.env.ADMIN_EMAIL && password === '@Mansi123') {
-      const token = generateToken({
-        email: email,
-        type: 'admin'
-      });
-
+      const token = generateToken({ email, type: 'admin' });
       return res.json({
         success: true,
         token,
-        user: {
-          email: email,
-          type: 'admin'
-        }
+        user: { email, type: 'admin' }
       });
     }
 
-    // Find user in database
-    const [users] = await pool.query(
-      'SELECT * FROM users WHERE email = ?',
+    // Find user
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
       [email]
     );
 
-    if (users.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const user = users[0];
+    const user = result.rows[0];
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
-    
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     if (user.is_blocked) {
-  return res.status(403).json({ 
-    success: false,
-    message: 'Your account has been suspended. Please contact support.' 
-  });
-}
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended. Please contact support.'
+      });
+    }
 
-    // Generate token
     const token = generateToken({
       userId: user.id,
       email: user.email,
@@ -71,11 +54,7 @@ exports.loginUser = async (req, res) => {
     res.json({
       success: true,
       token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email
-      }
+      user: { id: user.id, name: user.name, email: user.email }
     });
 
   } catch (error) {
@@ -89,44 +68,30 @@ exports.registerUser = async (req, res) => {
   try {
     const { name, email, password, phone, location } = req.body;
 
-    // Check if user exists
-    const [existingUsers] = await pool.query(
-      'SELECT * FROM users WHERE email = ?',
+    const existing = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
       [email]
     );
 
-    if (existingUsers.length > 0) {
+    if (existing.rows.length > 0) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Generate unique ID
     const userId = Date.now().toString(36) + Math.random().toString(36).substr(2);
 
-    // Insert user
     await pool.query(
-      'INSERT INTO users (id, name, email, password, phone, location) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (id, name, email, password, phone, location) VALUES ($1, $2, $3, $4, $5, $6)',
       [userId, name, email, hashedPassword, phone, location]
     );
 
-    // Generate token
-    const token = generateToken({
-      userId: userId,
-      email: email,
-      type: 'user'
-    });
+    const token = generateToken({ userId, email, type: 'user' });
 
     res.status(201).json({
       success: true,
       message: 'Registration successful',
       token,
-      user: {
-        id: userId,
-        name,
-        email
-      }
+      user: { id: userId, name, email }
     });
 
   } catch (error) {
@@ -136,72 +101,45 @@ exports.registerUser = async (req, res) => {
 };
 
 // VENDOR REGISTRATION
-// VENDOR REGISTRATION — replace your existing registerVendor with this
 exports.registerVendor = async (req, res) => {
   try {
     const {
-      businessName,
-      ownerName,
-      email,
-      password,
-      phone,
-      address,
-      city,
-      state,
-      zipCode,
-      serviceCategory,
-      servicesOffered,
-      description,
-      yearsInBusiness,
-      pricing,
-      availability,
-      website,
-      certification,
-      additionalInfo   // ← new field from frontend
+      businessName, ownerName, email, password, phone,
+      address, city, state, zipCode, serviceCategory,
+      servicesOffered, description, yearsInBusiness,
+      pricing, availability, website, certification, additionalInfo
     } = req.body;
 
-    // Check if vendor exists
-    const [existingVendors] = await pool.query(
-      'SELECT * FROM vendors WHERE email = ?',
+    const existing = await pool.query(
+      'SELECT * FROM vendors WHERE email = $1',
       [email]
     );
 
-    if (existingVendors.length > 0) {
+    if (existing.rows.length > 0) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Generate unique ID
     const vendorId = Date.now().toString(36) + Math.random().toString(36).substr(2);
 
-    // Parse additionalInfo safely
     let parsedAdditionalInfo = null;
     if (additionalInfo) {
-      try {
-        // If it's already an object (sent as JSON body), stringify it for storage
-        // If it's a string, validate it's proper JSON
-        parsedAdditionalInfo = typeof additionalInfo === 'string'
-          ? additionalInfo
-          : JSON.stringify(additionalInfo);
-      } catch (e) {
-        parsedAdditionalInfo = null;
-      }
+      parsedAdditionalInfo = typeof additionalInfo === 'string'
+        ? additionalInfo
+        : JSON.stringify(additionalInfo);
     }
 
-    // Insert vendor
     await pool.query(
       `INSERT INTO vendors 
-       (id, business_name, owner_name, email, password, phone, address, city, state, 
-        zip_code, service_category, services_offered, description, years_in_business, 
-        pricing, availability, website, certification, additional_info, is_approved) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, false)`,
+       (id, business_name, owner_name, email, password, phone, address, city, state,
+        zip_code, service_category, services_offered, description, years_in_business,
+        pricing, availability, website, certification, additional_info, is_approved)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,false)`,
       [
-        vendorId, businessName, ownerName, email, hashedPassword, phone, address,
-        city, state, zipCode, serviceCategory, servicesOffered, description,
-        yearsInBusiness, pricing, availability, website, certification,
-        parsedAdditionalInfo   // ← added here
+        vendorId, businessName, ownerName, email, hashedPassword, phone,
+        address, city, state, zipCode, serviceCategory, servicesOffered,
+        description, yearsInBusiness, pricing, availability,
+        website, certification, parsedAdditionalInfo
       ]
     );
 
@@ -221,34 +159,29 @@ exports.loginVendor = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find vendor
-    const [vendors] = await pool.query(
-      'SELECT * FROM vendors WHERE email = ?',
+    const result = await pool.query(
+      'SELECT * FROM vendors WHERE email = $1',
       [email]
     );
 
-    if (vendors.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const vendor = vendors[0];
+    const vendor = result.rows[0];
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, vendor.password);
-    
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check if approved
     if (!vendor.is_approved) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         message: 'Your account is pending admin approval',
         isApproved: false
       });
     }
 
-    // Generate token
     const token = generateToken({
       vendorId: vendor.id,
       email: vendor.email,
