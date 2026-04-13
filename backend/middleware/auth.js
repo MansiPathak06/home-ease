@@ -13,8 +13,11 @@ const verifyToken = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
-  } catch (error) {
-    return res.status(403).json({ message: 'Invalid or expired token' });
+ } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired, please login again' });
+    }
+    return res.status(403).json({ message: 'Invalid token' });
   }
 };
 
@@ -28,7 +31,7 @@ const isAdmin = (req, res, next) => {
 
 // Check if user is vendor
 const isVendor = (req, res, next) => {
-  if (req.user.type !== 'vendor') {
+  if (req.user.type !== 'vendor' && req.user.role !== 'vendor') {
     return res.status(403).json({ message: 'Vendor access required' });
   }
   next();
@@ -36,10 +39,12 @@ const isVendor = (req, res, next) => {
 
 // Check if user is regular user
 const isUser = (req, res, next) => {
-  if (req.user.type !== 'user') {
+  console.log("isUser check - req.user:", req.user);
+  const type = req.user.type || req.user.role;
+  console.log("type resolved to:", type);
+  if (type !== 'user') {
     return res.status(403).json({ message: 'User access required' });
   }
   next();
 };
-
 module.exports = { verifyToken, isAdmin, isVendor, isUser };

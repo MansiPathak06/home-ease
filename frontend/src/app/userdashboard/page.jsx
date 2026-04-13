@@ -6,7 +6,7 @@ import {
   Search, Star, MapPin, Phone, Mail, Calendar, Clock,
   Heart, LogOut, User, Bell, IndianRupee, Shield, X,
   CheckCircle, XCircle, AlertCircle, ChevronRight,
-  RefreshCw, FileText, Loader2,  Navigation,
+  FileText, Loader2, Navigation, ArrowUpRight,
 } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────
@@ -33,7 +33,6 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// Add this helper at the top with other helpers
 const formatDate = (dateStr) => {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
@@ -42,21 +41,12 @@ const formatDate = (dateStr) => {
   });
 };
 
-// ─── Categories ───────────────────────────────────────────
-const CATEGORIES = [
-  "All", "Catering", "Photography", "Videography", "Decoration",
-  "Entertainment", "Venue", "Transportation", "Wedding Planning",
-  "Florist", "Makeup & Hair", "DJ/Music",
-];
-
 export default function UserDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("browse");
+  const [activeTab, setActiveTab] = useState("bookings");
   const [vendors, setVendors] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [favorites, setFavorites] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -110,11 +100,11 @@ export default function UserDashboard() {
     }
   };
 
-  // ── Cancel Booking ────────────────────────────────────────
   const handleCancelOpen = (booking) => {
     setCancelModal({ open: true, booking });
     setCancelReason("");
   };
+
   const handleCancelConfirm = async () => {
     if (!cancelReason.trim()) {
       showToast("Please provide a cancellation reason", "error");
@@ -142,20 +132,6 @@ export default function UserDashboard() {
       setActionLoading(false);
     }
   };
-
-  // ── Filters ───────────────────────────────────────────────
-  const filteredVendors = vendors
-    .filter((v) => v?.id)
-    .filter((v) => {
-      const q = searchQuery.toLowerCase();
-      const name = gp(v, "businessName", "business_name").toLowerCase();
-      const cat  = gp(v, "serviceCategory", "service_category").toLowerCase();
-      const svcs = gp(v, "servicesOffered", "services_offered").toLowerCase();
-      return (
-        (name.includes(q) || cat.includes(q) || svcs.includes(q)) &&
-        (selectedCategory === "all" || cat === selectedCategory.toLowerCase())
-      );
-    });
 
   const handleLogout = () => { localStorage.clear(); router.push("/login"); };
 
@@ -192,6 +168,15 @@ export default function UserDashboard() {
               <p className="text-xs text-gray-500 mt-0.5">Find & book the perfect service</p>
             </div>
             <div className="flex items-center gap-2">
+              {/* Browse Services CTA */}
+              <button
+                onClick={() => router.push("/services")}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm font-semibold"
+              >
+                Browse Services
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+
               <button className="p-2 hover:bg-gray-100 rounded-lg relative">
                 <Bell className="w-5 h-5 text-gray-600" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
@@ -212,10 +197,9 @@ export default function UserDashboard() {
         {/* ── Tabs ── */}
         <div className="bg-white rounded-xl shadow-sm p-1.5 mb-6 flex gap-1 overflow-x-auto border border-gray-100">
           {[
-            { id: "browse",    label: "Browse Services", icon: Search,   badge: 0 },
-            { id: "bookings",  label: "My Bookings",     icon: Calendar, badge: bookings.filter(b => b.status === "pending").length },
-            { id: "favorites", label: "Favorites",       icon: Heart,    badge: favorites.length },
-            { id: "profile",   label: "Profile",         icon: User,     badge: 0 },
+            { id: "bookings",  label: "My Bookings",  icon: Calendar, badge: bookings.filter(b => b.status === "pending").length },
+            { id: "favorites", label: "Favorites",    icon: Heart,    badge: favorites.length },
+            { id: "profile",   label: "Profile",      icon: User,     badge: 0 },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -235,109 +219,6 @@ export default function UserDashboard() {
           ))}
         </div>
 
-        {/* ══ BROWSE ══════════════════════════════════════════ */}
-        {activeTab === "browse" && (
-          <div>
-            {/* Search bar */}
-            <div className="bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100">
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search vendors by name, service..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  />
-                </div>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c.toLowerCase()}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <p className="text-xs text-gray-400 mt-2">{filteredVendors.length} vendor{filteredVendors.length !== 1 ? "s" : ""} found</p>
-            </div>
-
-            {/* Vendor Cards */}
-            {filteredVendors.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
-                <Search className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm font-medium">No vendors found</p>
-                <p className="text-gray-400 text-xs mt-1">Try a different search or category</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredVendors.map((vendor) => {
-                  const isFav = favorites.some((f) => (f.vendorId || f.vendor_id) === vendor.id);
-                  const name  = gp(vendor, "businessName", "business_name");
-                  const cat   = gp(vendor, "serviceCategory", "service_category");
-                  const desc  = gp(vendor, "description", "description");
-                  const rating = vendor.average_rating || vendor.averageRating || 4;
-                  const reviews = vendor.review_count || vendor.reviewCount || 0;
-
-                  return (
-                    <div key={vendor.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                      {/* Color banner */}
-                      <div className="h-28 bg-gradient-to-br from-red-500 to-orange-500 relative">
-                        <button
-                          onClick={() => toggleFavorite(vendor.id)}
-                          className="absolute top-2.5 right-2.5 p-1.5 bg-white/90 backdrop-blur rounded-full shadow hover:scale-110 transition-transform"
-                        >
-                          <Heart className={`w-3.5 h-3.5 ${isFav ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
-                        </button>
-                        <div className="absolute bottom-2.5 left-2.5">
-                          <span className="px-2.5 py-0.5 bg-white/95 backdrop-blur rounded-full text-xs font-bold text-red-600 shadow-sm">
-                            {cat}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-900 mb-1 text-[15px] leading-tight">{name}</h3>
-
-                        <div className="flex items-center gap-1 mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
-                          ))}
-                          <span className="text-xs text-gray-500 ml-1">({reviews})</span>
-                        </div>
-
-                        <p className="text-gray-500 text-xs mb-3 line-clamp-2 leading-relaxed">{desc || "No description available."}</p>
-
-                        <div className="space-y-1 mb-3 text-xs text-gray-500">
-                          {(vendor.city || vendor.state) && (
-                            <div className="flex items-center gap-1.5">
-                              <MapPin className="w-3 h-3 text-red-400" />
-                              {[vendor.city, vendor.state].filter(Boolean).join(", ")}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1.5">
-                            <IndianRupee className="w-3 h-3 text-green-500" />
-                            <span className="font-medium text-gray-700">{vendor.pricing || "Contact for pricing"}</span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => setSelectedVendor(vendor)}
-                          className="w-full bg-red-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-1.5"
-                        >
-                          View Details <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ══ MY BOOKINGS ═════════════════════════════════════ */}
         {activeTab === "bookings" && (
           <div>
@@ -349,11 +230,12 @@ export default function UserDashboard() {
               <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
                 <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-3" />
                 <p className="text-gray-500 font-medium text-sm">No bookings yet</p>
+                <p className="text-gray-400 text-xs mt-1 mb-4">Head to Services to find and book a vendor</p>
                 <button
-                  onClick={() => setActiveTab("browse")}
-                  className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700"
+                  onClick={() => router.push("/services")}
+                  className="px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 inline-flex items-center gap-1.5"
                 >
-                  Browse Services
+                  Browse Services <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
@@ -402,33 +284,32 @@ export default function UserDashboard() {
                           )}
                         </div>
 
-                     <div className="flex sm:flex-col items-center sm:items-end gap-2">
-  <button
-    onClick={() => setSelectedBooking(b)}
-    className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-xs font-semibold transition-colors"
-  >
-    <FileText className="w-3.5 h-3.5" /> View
-  </button>
+                        <div className="flex sm:flex-col items-center sm:items-end gap-2">
+                          <button
+                            onClick={() => setSelectedBooking(b)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-xs font-semibold transition-colors"
+                          >
+                            <FileText className="w-3.5 h-3.5" /> View
+                          </button>
 
-  {/* ── Track button: show when approved or vendor is on the way ── */}
-  {(b.status === "approved" || b.tracking_status === "en_route" || b.tracking_status === "arrived" || b.tracking_status === "in_service") && (
-    <button
-      onClick={() => router.push(`/userdashboard/track/${b.id}`)}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-xs font-semibold transition-colors"
-    >
-      <Navigation className="w-3.5 h-3.5" /> Track
-    </button>
-  )}
+                          {(b.status === "approved" || b.tracking_status === "en_route" || b.tracking_status === "arrived" || b.tracking_status === "in_service") && (
+                            <button
+                              onClick={() => router.push(`/userdashboard/track/${b.id}`)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-xs font-semibold transition-colors"
+                            >
+                              <Navigation className="w-3.5 h-3.5" /> Track
+                            </button>
+                          )}
 
-  {(b.status === "pending" || b.status === "approved" || b.status === "confirmed") && (
-    <button
-      onClick={() => handleCancelOpen(b)}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition-colors border border-red-200"
-    >
-      <XCircle className="w-3.5 h-3.5" /> Cancel
-    </button>
-  )}
-</div>
+                          {(b.status === "pending" || b.status === "approved" || b.status === "confirmed") && (
+                            <button
+                              onClick={() => handleCancelOpen(b)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition-colors border border-red-200"
+                            >
+                              <XCircle className="w-3.5 h-3.5" /> Cancel
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -449,11 +330,12 @@ export default function UserDashboard() {
               <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
                 <Heart className="w-12 h-12 text-gray-200 mx-auto mb-3" />
                 <p className="text-gray-500 font-medium text-sm">No favorites yet</p>
+                <p className="text-gray-400 text-xs mt-1 mb-4">Save vendors you like while browsing services</p>
                 <button
-                  onClick={() => setActiveTab("browse")}
-                  className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700"
+                  onClick={() => router.push("/services")}
+                  className="px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 inline-flex items-center gap-1.5"
                 >
-                  Browse Services
+                  Browse Services <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
@@ -555,7 +437,6 @@ export default function UserDashboard() {
       {selectedVendor && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
           <div className="bg-white w-full sm:rounded-2xl sm:max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl">
-            {/* Banner */}
             <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 pt-6 pb-8 text-white relative">
               <button
                 onClick={() => setSelectedVendor(null)}
@@ -576,7 +457,6 @@ export default function UserDashboard() {
             </div>
 
             <div className="px-6 py-6 space-y-5 -mt-2">
-              {/* Quick info chips */}
               <div className="flex flex-wrap gap-2">
                 {selectedVendor.city && (
                   <span className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full">
@@ -601,7 +481,6 @@ export default function UserDashboard() {
                 )}
               </div>
 
-              {/* About */}
               <div>
                 <h3 className="text-sm font-bold text-gray-900 mb-2">About</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
@@ -609,7 +488,6 @@ export default function UserDashboard() {
                 </p>
               </div>
 
-              {/* Services */}
               <div>
                 <h3 className="text-sm font-bold text-gray-900 mb-2">Services Offered</h3>
                 <p className="text-sm text-gray-600">
@@ -617,7 +495,6 @@ export default function UserDashboard() {
                 </p>
               </div>
 
-              {/* Contact */}
               <div className="bg-gray-50 rounded-xl p-4">
                 <h3 className="text-sm font-bold text-gray-900 mb-3">Contact Information</h3>
                 <div className="space-y-2">
@@ -651,7 +528,6 @@ export default function UserDashboard() {
                 </div>
               </div>
 
-              {/* Certification */}
               {selectedVendor.certification && (
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 mb-2">Certifications</h3>
@@ -659,7 +535,6 @@ export default function UserDashboard() {
                 </div>
               )}
 
-              {/* CTA */}
               <div className="flex gap-3 pt-3 border-t border-gray-100">
                 <button
                   onClick={() => toggleFavorite(selectedVendor.id)}

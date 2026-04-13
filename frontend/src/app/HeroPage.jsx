@@ -53,19 +53,22 @@ export default function HomeEaseHero() {
             <img src={image.url} alt={image.alt} className="w-full h-full object-cover" />
           </div>
         ))}
-        <div className="absolute inset-0 bg-black/55" />
+        {/* Darker overlay to match dark theme */}
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(10,10,10,0.72)' }} />
       </div>
 
       {/* Arrows */}
       <button
         onClick={prevImage}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/90 p-2 rounded-full shadow hover:scale-105 transition"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full shadow hover:scale-105 transition"
+        style={{ backgroundColor: '#1e1e1e', border: '1px solid #3a3a3a', color: '#C0392B' }}
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
       <button
         onClick={nextImage}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-white/90 p-2 rounded-full shadow hover:scale-105 transition"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full shadow hover:scale-105 transition"
+        style={{ backgroundColor: '#1e1e1e', border: '1px solid #3a3a3a', color: '#C0392B' }}
       >
         <ChevronRight className="w-5 h-5" />
       </button>
@@ -76,9 +79,11 @@ export default function HomeEaseHero() {
           <button
             key={index}
             onClick={() => setCurrentImage(index)}
-            className={`h-2 rounded-full transition-all ${
-              index === currentImage ? 'bg-white w-6' : 'bg-white/50 w-2'
-            }`}
+            className={`h-2 rounded-full transition-all`}
+            style={{
+              width: index === currentImage ? '24px' : '8px',
+              backgroundColor: index === currentImage ? '#C0392B' : 'rgba(255,255,255,0.35)',
+            }}
           />
         ))}
       </div>
@@ -87,46 +92,61 @@ export default function HomeEaseHero() {
       <div className="relative z-20 max-w-6xl mx-auto px-4 h-full flex items-center">
         <div className="max-w-2xl space-y-6 text-center lg:text-left">
 
-          <span className="inline-block bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-medium tracking-wide">
+          <span
+            className="inline-block px-3 py-1 rounded-full text-xs font-medium tracking-wide"
+            style={{ backgroundColor: 'rgba(192,57,43,0.18)', color: '#e87c6e', border: '1px solid rgba(192,57,43,0.35)' }}
+          >
             Trusted by 50,000+ Homeowners
           </span>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white leading-tight">
-            Smart Home Services at Your <span className="text-red-500">Fingertips</span>
+            Smart Home Services at Your{' '}
+            <span style={{ color: '#C0392B' }}>Fingertips</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-gray-200 leading-relaxed">
+          <p className="text-sm sm:text-base leading-relaxed" style={{ color: '#c0c0c0' }}>
             Find and book trusted professionals for all your home needs in just a few clicks.
           </p>
 
           {/* Features */}
           <div className="flex flex-wrap gap-3">
-            <div className="flex items-center space-x-2 bg-white/10 px-3 py-2 rounded-lg">
-              <CheckCircle className="w-4 h-4 text-red-400" />
-              <span className="text-xs text-white">Verified</span>
-            </div>
-            <div className="flex items-center space-x-2 bg-white/10 px-3 py-2 rounded-lg">
-              <Clock className="w-4 h-4 text-red-400" />
-              <span className="text-xs text-white">Fast Booking</span>
-            </div>
-            <div className="flex items-center space-x-2 bg-white/10 px-3 py-2 rounded-lg">
-              <Shield className="w-4 h-4 text-red-400" />
-              <span className="text-xs text-white">Secure</span>
-            </div>
+            {[
+              { Icon: CheckCircle, label: 'Verified' },
+              { Icon: Clock,        label: 'Fast Booking' },
+              { Icon: Shield,       label: 'Secure' },
+            ].map(({ Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg"
+                style={{ backgroundColor: 'rgba(255,255,255,0.07)', border: '1px solid rgba(192,57,43,0.25)' }}
+              >
+                <Icon className="w-4 h-4" style={{ color: '#C0392B' }} />
+                <span className="text-xs text-white">{label}</span>
+              </div>
+            ))}
           </div>
 
           {/* Buttons */}
           <div className="flex gap-3 flex-wrap">
-            <button className="bg-red-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-red-700 transition">
+            <button
+              className="px-5 py-2.5 rounded-lg text-sm font-medium text-white transition"
+              style={{ backgroundColor: '#C0392B' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#991b1b'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#C0392B'}
+            >
               Book Service →
             </button>
-            <button className="bg-white text-red-600 px-5 py-2.5 rounded-lg text-sm font-medium border hover:bg-gray-100 transition">
+            <button
+              className="px-5 py-2.5 rounded-lg text-sm font-medium transition"
+              style={{ backgroundColor: '#1e1e1e', color: '#e87c6e', border: '1px solid #C0392B' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2a2a2a'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1e1e1e'}
+            >
               Learn More
             </button>
           </div>
         </div>
       </div>
-
     </div>
   );
 }

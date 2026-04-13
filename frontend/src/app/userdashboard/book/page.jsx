@@ -1,317 +1,358 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Calendar, Clock, Users, MessageSquare, CheckCircle, IndianRupee, MapPin, Star, Shield } from "lucide-react";
+import { ArrowLeft, CheckCircle, MapPin, Star, Shield, ChevronRight, Sparkles } from "lucide-react";
+
+const timeSlots = [
+  "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+  "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM",
+  "05:00 PM", "06:00 PM",
+];
+
+const today = new Date().toISOString().split("T")[0];
 
 export default function BookService() {
   const router = useRouter();
   const [vendor, setVendor] = useState(null);
-  const [bookingData, setBookingData] = useState({
-    date: "",
-    time: "",
-    guests: "",
-    message: "",
-  });
+  const [step, setStep] = useState(1); // 1 = date, 2 = time, 3 = notes
+  const [bookingData, setBookingData] = useState({ date: "", time: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const selectedVendor = localStorage.getItem("selectedVendor");
-    if (selectedVendor) {
-      setVendor(JSON.parse(selectedVendor));
-    } else {
-      router.push("/userdashboard");
-    }
+    const raw = localStorage.getItem("selectedVendor");
+    if (raw) setVendor(JSON.parse(raw));
+    else router.push("/userdashboard");
   }, [router]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const businessName = vendor?.business_name || vendor?.businessName || "Vendor";
+  const serviceCategory = vendor?.service_category || vendor?.serviceCategory || "Service";
+  const pricing = vendor?.pricing || null;
+  const city = vendor?.city || "";
+  const state = vendor?.state || "";
+  const rating = vendor?.average_rating || vendor?.averageRating || 4.5;
+
+  const canNext1 = bookingData.date !== "";
+  const canNext2 = bookingData.time !== "";
+  const canSubmit = canNext1 && canNext2;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
     setLoading(true);
     setError("");
-
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/bookings", {
+      const res = await fetch("http://localhost:5000/api/user/bookings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           vendor_id: vendor.id,
-          service_name: vendor.service_category || vendor.serviceCategory,
-          vendor_name: vendor.business_name || vendor.businessName,
+          service_name: serviceCategory,
+          vendor_name: businessName,
           date: bookingData.date,
           time: bookingData.time,
-          guests: bookingData.guests,
           message: bookingData.message,
           amount: 0,
           status: "pending",
         }),
       });
-
-      if (response.ok) {
+      if (res.ok) {
         setSuccess(true);
         localStorage.removeItem("selectedVendor");
-        setTimeout(() => router.push("/userdashboard"), 2500);
+        setTimeout(() => router.push("/userdashboard"), 3000);
       } else {
-        const data = await response.json();
-        setError(data.message || "Booking failed. Please try again.");
+        const d = await res.json();
+        setError(d.message || "Booking failed. Please try again.");
       }
-    } catch (err) {
-      setError("Network error. Please check your connection and try again.");
+    } catch {
+      setError("Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setBookingData({ ...bookingData, [e.target.name]: e.target.value });
+  // ── Format selected date nicely
+  const formatDate = (str) => {
+    if (!str) return null;
+    const d = new Date(str + "T00:00:00");
+    return d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   };
-
-  const timeSlots = [
-    "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-    "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM",
-  ];
-
-  const today = new Date().toISOString().split("T")[0];
 
   if (!vendor) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-sm font-medium">Loading...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#fafaf8" }}>
+        <div style={{ width: 36, height: 36, border: "3px solid #e5e7eb", borderTopColor: "#dc2626", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-md w-full">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <CheckCircle className="w-10 h-10 text-green-600" />
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#fafaf8" }}>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap');
+          .book-font { font-family: 'DM Sans', sans-serif; }
+          .book-serif { font-family: 'DM Serif Display', serif; }
+          @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+          @keyframes scaleIn { from { opacity:0; transform:scale(0.7); } to { opacity:1; transform:scale(1); } }
+          .anim-up { animation: fadeUp 0.5s ease forwards; }
+          .anim-scale { animation: scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        `}</style>
+        <div className="book-font text-center anim-up" style={{ maxWidth: 400 }}>
+          <div className="anim-scale" style={{ width: 80, height: 80, background: "linear-gradient(135deg,#16a34a,#4ade80)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}>
+            <CheckCircle style={{ width: 40, height: 40, color: "#fff" }} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Requested!</h2>
-          <p className="text-gray-500 text-sm mb-1">
-            Your booking with <span className="font-semibold text-gray-800">{vendor.business_name || vendor.businessName}</span> has been submitted.
+          <h2 className="book-serif" style={{ fontSize: 28, color: "#111", marginBottom: 10 }}>Booking Confirmed!</h2>
+          <p style={{ color: "#6b7280", fontSize: 15, lineHeight: 1.6 }}>
+            Your request with <strong style={{ color: "#111" }}>{businessName}</strong> has been sent.<br />
+            You'll hear back shortly.
           </p>
-          <p className="text-gray-400 text-xs mt-3">Redirecting to dashboard...</p>
-          <div className="mt-5 h-1 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-green-500 rounded-full animate-pulse" style={{ width: "60%" }} />
+          <div style={{ marginTop: 32, height: 3, background: "#f3f4f6", borderRadius: 8, overflow: "hidden" }}>
+            <div style={{ height: "100%", background: "linear-gradient(90deg,#dc2626,#f97316)", borderRadius: 8, animation: "progress 3s linear forwards" }} />
           </div>
+          <p style={{ color: "#9ca3af", fontSize: 12, marginTop: 10 }}>Redirecting to dashboard…</p>
         </div>
+        <style>{`@keyframes progress { from { width:0% } to { width:100% } }`}</style>
       </div>
     );
   }
 
-  const businessName = vendor.business_name || vendor.businessName || "Vendor";
-  const serviceCategory = vendor.service_category || vendor.serviceCategory || "Service";
-  const pricing = vendor.pricing || "Contact for pricing";
-  const city = vendor.city || "";
-  const state = vendor.state || "";
-  const rating = vendor.average_rating || vendor.averageRating || 4.5;
-
   return (
-    <div className="min-h-screen mt-20 bg-gradient-to-br from-rose-50 via-white to-orange-50">
-      {/* Top nav */}
-      <div className="sticky top-16 z-10 bg-white/80 backdrop-blur border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors text-sm font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
+        .book-wrap *, .book-wrap *::before, .book-wrap *::after { box-sizing: border-box; }
+        .book-wrap { font-family: 'DM Sans', sans-serif; min-height: 100vh; background: #fafaf8; padding-top: 80px; margin: 0; }
+        .book-serif { font-family: 'DM Serif Display', serif; }
+
+        /* ── layout ── */
+        .bk-inner { max-width: 560px; margin: 0 auto; padding: 32px 20px 60px; }
+
+        /* ── back ── */
+        .bk-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #6b7280; background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 28px; transition: color .15s; }
+        .bk-back:hover { color: #dc2626; }
+
+        /* ── vendor card ── */
+        .bk-vendor { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 20px rgba(0,0,0,.04); margin-bottom: 28px; }
+        .bk-vendor-top { background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%); padding: 24px; color: #fff; }
+        .bk-vendor-cat { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.65); margin-bottom: 6px; }
+        .bk-vendor-name { font-size: 22px; font-weight: 600; color: #fff; line-height: 1.2; margin-bottom: 12px; }
+        .bk-vendor-meta { display: flex; align-items: center; justify-content: space-between; }
+        .bk-vendor-loc { display: flex; align-items: center; gap: 5px; font-size: 12px; color: rgba(255,255,255,.75); }
+        .bk-stars { display: flex; gap: 2px; }
+        .bk-vendor-bottom { padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; background: #fff7ed; border-top: 1px solid #fed7aa; }
+        .bk-price { font-size: 13px; color: #92400e; font-weight: 500; }
+        .bk-price strong { font-weight: 700; color: #7c2d12; }
+        .bk-verified { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #15803d; background: #dcfce7; border-radius: 20px; padding: 4px 10px; }
+
+        /* ── section label ── */
+        .bk-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #9ca3af; margin-bottom: 14px; }
+
+        /* ── date input ── */
+        .bk-section { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 16px; }
+        .bk-section-title { font-size: 17px; font-weight: 600; color: #111; margin-bottom: 6px; }
+        .bk-section-sub { font-size: 13px; color: #9ca3af; margin-bottom: 22px; }
+        .bk-date-input { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 13px 16px; font-size: 15px; font-family: inherit; color: #111; background: #fafaf8; transition: border .15s, box-shadow .15s; outline: none; }
+        .bk-date-input:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.1); background: #fff; }
+        .bk-date-display { margin-top: 10px; font-size: 13px; color: #dc2626; font-weight: 500; min-height: 18px; }
+
+        /* ── time slots ── */
+        .bk-time-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        @media (min-width: 400px) { .bk-time-grid { grid-template-columns: repeat(5, 1fr); } }
+        .bk-slot { border: 1.5px solid #e5e7eb; background: #fafaf8; border-radius: 10px; padding: 10px 6px; font-size: 12px; font-weight: 500; color: #4b5563; cursor: pointer; transition: all .15s; text-align: center; outline: none; font-family: inherit; }
+        .bk-slot:hover { border-color: #dc2626; color: #dc2626; background: #fff5f5; }
+        .bk-slot.selected { border-color: #dc2626; background: #dc2626; color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(220,38,38,.3); }
+
+        /* ── textarea ── */
+        .bk-textarea { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 13px 16px; font-size: 14px; font-family: inherit; color: #111; background: #fafaf8; resize: none; min-height: 110px; outline: none; transition: border .15s, box-shadow .15s; line-height: 1.6; }
+        .bk-textarea:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.1); background: #fff; }
+        .bk-textarea::placeholder { color: #c4c4c4; }
+
+        /* ── summary row ── */
+        .bk-summary { background: #fff; border-radius: 16px; border: 1.5px solid #f3f4f6; padding: 20px 24px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .bk-summary-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+        .bk-summary-key { color: #9ca3af; font-weight: 500; }
+        .bk-summary-val { color: #111; font-weight: 600; }
+
+        /* ── error ── */
+        .bk-error { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #b91c1c; margin-bottom: 16px; }
+
+        /* ── actions ── */
+        .bk-actions { display: flex; gap: 10px; }
+        .bk-btn-ghost { flex: 1; padding: 14px; border: 1.5px solid #e5e7eb; border-radius: 12px; font-size: 14px; font-weight: 600; color: #6b7280; background: #fff; cursor: pointer; font-family: inherit; transition: all .15s; }
+        .bk-btn-ghost:hover { border-color: #d1d5db; background: #f9fafb; }
+        .bk-btn-primary { flex: 2; padding: 14px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; color: #fff; background: linear-gradient(135deg, #dc2626, #ea580c); cursor: pointer; font-family: inherit; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(220,38,38,.3); }
+        .bk-btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(220,38,38,.35); }
+        .bk-btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── progress dots ── */
+        .bk-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+        .bk-dot { width: 8px; height: 8px; border-radius: 50%; background: #e5e7eb; transition: all .2s; }
+        .bk-dot.active { background: #dc2626; width: 24px; border-radius: 4px; }
+        .bk-dot.done { background: #fca5a5; }
+
+        /* ── spinner ── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .anim-up { animation: fadeUp .3s ease forwards; }
+      `}</style>
+
+      <div className="book-wrap">
+        <div className="bk-inner">
+
+          {/* Back */}
+          <button className="bk-back" onClick={() => router.back()}>
+            <ArrowLeft style={{ width: 15, height: 15 }} />
             Back
           </button>
-          <span className="text-gray-300">|</span>
-          <span className="text-sm text-gray-500">Book a Service</span>
-        </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* Vendor Info Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-          <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 py-5 text-white">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-red-100 text-xs font-semibold uppercase tracking-wider mb-1">{serviceCategory}</p>
-                <h1 className="text-2xl font-bold">{businessName}</h1>
-                {(city || state) && (
-                  <div className="flex items-center gap-1.5 mt-2 text-red-100 text-sm">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{[city, state].filter(Boolean).join(", ")}</span>
+          {/* Vendor Card */}
+          <div className="bk-vendor">
+            <div className="bk-vendor-top">
+              <div className="bk-vendor-cat">{serviceCategory}</div>
+              <div className="bk-vendor-name book-serif">{businessName}</div>
+              <div className="bk-vendor-meta">
+                {(city || state) ? (
+                  <div className="bk-vendor-loc">
+                    <MapPin style={{ width: 12, height: 12 }} />
+                    {[city, state].filter(Boolean).join(", ")}
+                  </div>
+                ) : <span />}
+                <div className="bk-stars">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} style={{ width: 13, height: 13, fill: i < Math.floor(rating) ? "#fde047" : "transparent", color: i < Math.floor(rating) ? "#fde047" : "rgba(255,255,255,.35)" }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="bk-vendor-bottom">
+              <div className="bk-price">
+                {pricing ? <>Starting from <strong>₹{pricing}</strong></> : <span style={{ color: "#b45309" }}>Contact for pricing</span>}
+              </div>
+              <div className="bk-verified">
+                <Shield style={{ width: 11, height: 11 }} />
+                Verified
+              </div>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <div className="bk-progress">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className={`bk-dot ${step === s ? "active" : step > s ? "done" : ""}`} />
+            ))}
+            <span style={{ fontSize: 12, color: "#9ca3af", marginLeft: 4 }}>Step {step} of 3</span>
+          </div>
+
+          {/* ── STEP 1: Date ── */}
+          {step === 1 && (
+            <div className="bk-section anim-up">
+              <div className="bk-section-title">When do you need the service?</div>
+              <div className="bk-section-sub">Pick a date that works for you</div>
+              <div className="bk-label">Select Date</div>
+              <input
+                type="date"
+                className="bk-date-input"
+                min={today}
+                value={bookingData.date}
+                onChange={(e) => setBookingData({ ...bookingData, date: e.target.value })}
+              />
+              <div className="bk-date-display">
+                {bookingData.date ? `📅 ${formatDate(bookingData.date)}` : ""}
+              </div>
+              <div className="bk-actions" style={{ marginTop: 28 }}>
+                <button className="bk-btn-ghost" onClick={() => router.back()}>Cancel</button>
+                <button className="bk-btn-primary" disabled={!canNext1} onClick={() => setStep(2)}>
+                  Continue <ChevronRight style={{ width: 16, height: 16 }} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 2: Time ── */}
+          {step === 2 && (
+            <div className="bk-section anim-up">
+              <div className="bk-section-title">Pick a time slot</div>
+              <div className="bk-section-sub">Choose your preferred arrival time</div>
+              <div className="bk-label">Available Slots</div>
+              <div className="bk-time-grid">
+                {timeSlots.map((slot) => (
+                  <button
+                    key={slot}
+                    className={`bk-slot ${bookingData.time === slot ? "selected" : ""}`}
+                    onClick={() => setBookingData({ ...bookingData, time: slot })}
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
+              <div className="bk-actions" style={{ marginTop: 28 }}>
+                <button className="bk-btn-ghost" onClick={() => setStep(1)}>Back</button>
+                <button className="bk-btn-primary" disabled={!canNext2} onClick={() => setStep(3)}>
+                  Continue <ChevronRight style={{ width: 16, height: 16 }} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 3: Notes + Confirm ── */}
+          {step === 3 && (
+            <div className="anim-up">
+              <div className="bk-section">
+                <div className="bk-section-title">Any special requests?</div>
+                <div className="bk-section-sub">Optional — let the vendor know anything specific</div>
+                <div className="bk-label">Notes</div>
+                <textarea
+                  className="bk-textarea"
+                  placeholder="e.g. Need service on ground floor, prefer morning visit, specific materials required..."
+                  value={bookingData.message}
+                  onChange={(e) => setBookingData({ ...bookingData, message: e.target.value })}
+                />
+              </div>
+
+              {/* Summary */}
+              <div className="bk-summary">
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#d1d5db", marginBottom: 4 }}>Booking Summary</div>
+                <div className="bk-summary-row">
+                  <span className="bk-summary-key">Vendor</span>
+                  <span className="bk-summary-val">{businessName}</span>
+                </div>
+                <div className="bk-summary-row">
+                  <span className="bk-summary-key">Date</span>
+                  <span className="bk-summary-val">{formatDate(bookingData.date)}</span>
+                </div>
+                <div className="bk-summary-row">
+                  <span className="bk-summary-key">Time</span>
+                  <span className="bk-summary-val">{bookingData.time}</span>
+                </div>
+                {pricing && (
+                  <div className="bk-summary-row">
+                    <span className="bk-summary-key">Starting from</span>
+                    <span className="bk-summary-val" style={{ color: "#dc2626" }}>₹{pricing}</span>
                   </div>
                 )}
               </div>
-              <div className="text-right">
-                <div className="flex items-center gap-1 justify-end mb-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? "fill-yellow-300 text-yellow-300" : "text-red-300"}`} />
-                  ))}
-                </div>
-                <p className="text-red-100 text-xs">{rating} rating</p>
+
+              {error && <div className="bk-error">{error}</div>}
+
+              <div className="bk-actions">
+                <button className="bk-btn-ghost" onClick={() => setStep(2)}>Back</button>
+                <button className="bk-btn-primary" disabled={loading || !canSubmit} onClick={handleSubmit}>
+                  {loading
+                    ? <><div className="spinner" /> Submitting…</>
+                    : <><Sparkles style={{ width: 16, height: 16 }} /> Confirm Booking</>
+                  }
+                </button>
               </div>
             </div>
-          </div>
-          <div className="px-6 py-4 flex items-center justify-between bg-orange-50 border-t border-orange-100">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <p>Starting from</p>
-              <IndianRupee className="w-4 h-4 text-orange-600" />
-              <span className="font-semibold">{pricing}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
-              <Shield className="w-3.5 h-3.5" />
-              Verified Vendor
-            </div>
-          </div>
-        </div>
+          )}
 
-        {/* Booking Form */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-50">
-            <h2 className="text-lg font-bold text-gray-900">Book This Service</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Fill in your details and we'll confirm shortly</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Date & Time */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-red-500" />
-                Date & Time
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1.5">Event Date <span className="text-red-500">*</span></label>
-                  <input
-                    name="date"
-                    type="date"
-                    required
-                    min={today}
-                    value={bookingData.date}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1.5">Preferred Time <span className="text-red-500">*</span></label>
-                  <select
-                    name="time"
-                    required
-                    value={bookingData.time}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                  >
-                    <option value="">Select time slot</option>
-                    {timeSlots.map((slot) => (
-                      <option key={slot} value={slot}>{slot}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Guests */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
-                <Users className="w-4 h-4 text-red-500" />
-                Number of Guests <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="guests"
-                type="number"
-                min="1"
-                max="10000"
-                required
-                value={bookingData.guests}
-                onChange={handleChange}
-                placeholder="e.g. 100"
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* Special Requirements */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-red-500" />
-                Special Requirements
-              </label>
-              <textarea
-                name="message"
-                rows="4"
-                value={bookingData.message}
-                onChange={handleChange}
-                placeholder="Any special requests, dietary requirements, theme preferences, or additional notes for the vendor..."
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none transition-all"
-              />
-            </div>
-
-            {/* Price Note */}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
-              <IndianRupee className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-amber-800">Pricing in Indian Rupees (₹)</p>
-                <p className="text-xs text-amber-700 mt-0.5">
-                  The vendor will confirm the final pricing in ₹ after reviewing your booking request.
-                  Vendor's listed range: <span className="font-medium">{pricing}</span>
-                </p>
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-3 pt-2 border-t border-gray-50">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-2 flex-grow-[2] py-3 px-6 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl text-sm font-semibold hover:from-red-700 hover:to-orange-700 transition-all flex items-center justify-center gap-2 disabled:opacity-60 shadow-md shadow-red-200"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    Confirm Booking
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Trust Badges */}
-        <div className="grid grid-cols-3 gap-3 mt-4">
-          {[
-            { emoji: "🔒", text: "Secure Booking" },
-            { emoji: "✅", text: "Verified Vendors" },
-            { emoji: "💬", text: "24/7 Support" },
-          ].map(({ emoji, text }) => (
-            <div key={text} className="bg-white border border-gray-100 rounded-xl py-3 px-2 text-center shadow-sm">
-              <p className="text-lg mb-1">{emoji}</p>
-              <p className="text-xs font-medium text-gray-600">{text}</p>
-            </div>
-          ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }

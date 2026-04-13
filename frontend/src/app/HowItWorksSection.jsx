@@ -127,47 +127,69 @@ const HowItWorksSection = () => {
   }, []);
 
   return (
-    <div className="bg-white">
+    // THEME CHANGE: was bg-white → dark charcoal background
+    <div style={{ backgroundColor: "#111111" }}>
 
       {/* ── How It Works ─────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest text-red-600 uppercase mb-2">Simple Process</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">How Home Ease Works</h2>
+          {/* THEME CHANGE: was text-red-600 → bright crimson accent */}
+          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "#CC0000" }}>Simple Process</p>
+          {/* THEME CHANGE: was text-gray-900 → white for dark bg */}
+          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: "#FFFFFF" }}>How Home Ease Works</h2>
         </div>
 
         {/* Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-3 border border-gray-200">
+        {/* THEME CHANGE: was border-gray-200 → dark border */}
+        <div className="grid grid-cols-1 md:grid-cols-3" style={{ border: "1px solid #2a2a2a" }}>
           {steps.map((step, index) => {
-            const Icon = step.icon;
             return (
               <div
                 key={step.id}
                 ref={(el) => (stepsRef.current[index] = el)}
                 className={`
                   relative p-6 md:p-8
-                  ${index < steps.length - 1 ? "border-b md:border-b-0 md:border-r border-gray-200" : ""}
-                  group hover:bg-red-600 transition-colors duration-300
+                  group transition-colors duration-300
                   ${visibleSteps.includes(index) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}
                   transition-all duration-500
                 `}
-                style={{ transitionDelay: `${index * 100}ms` }}
+                style={{
+                  transitionDelay: `${index * 100}ms`,
+                  // THEME CHANGE: right/bottom borders in dark tone
+                  borderRight: index < steps.length - 1 ? "1px solid #2a2a2a" : "none",
+                  backgroundColor: "#111111",
+                }}
+                // THEME CHANGE: hover → deep crimson #8B0000
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#8B0000"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#111111"; }}
               >
-                {/* Step number */}
-                <div className="absolute top-4 right-4 text-5xl font-black text-gray-100 group-hover:text-red-500 transition-colors duration-300 select-none leading-none">
+                {/* Step number — THEME CHANGE: was text-gray-100 → subtle dark */}
+                <div
+                  className="absolute top-4 right-4 text-5xl font-black select-none leading-none transition-colors duration-300"
+                  style={{ color: "#2a2a2a" }}
+                >
                   {String(step.id).padStart(2, "0")}
                 </div>
 
-                <div className="w-10 h-10 bg-red-600 group-hover:bg-white flex items-center justify-center mb-4 transition-colors duration-300">
-                  <Icon className="w-5 h-5 text-white group-hover:text-red-600 transition-colors duration-300" />
+                {/* THEME CHANGE: icon box was bg-red-600 → #CC0000; hover → white */}
+                <div
+                  className="w-10 h-10 flex items-center justify-center mb-4 transition-colors duration-300"
+                  style={{ backgroundColor: "#CC0000" }}
+                >
+                  {React.createElement(step.icon, {
+                    className: "w-5 h-5",
+                    style: { color: "#FFFFFF" },
+                  })}
                 </div>
 
-                <h3 className="text-base font-bold text-gray-900 group-hover:text-white mb-1.5 transition-colors duration-300">
+                {/* THEME CHANGE: title was text-gray-900 → white */}
+                <h3 className="text-base font-bold mb-1.5 transition-colors duration-300" style={{ color: "#FFFFFF" }}>
                   {step.title}
                 </h3>
-                <p className="text-sm text-gray-500 group-hover:text-red-100 leading-relaxed transition-colors duration-300">
+                {/* THEME CHANGE: desc was text-gray-500 → muted light gray */}
+                <p className="text-sm leading-relaxed transition-colors duration-300" style={{ color: "#999999" }}>
                   {step.description}
                 </p>
               </div>
@@ -176,7 +198,11 @@ const HowItWorksSection = () => {
         </div>
 
         {/* ── Trust Features ────────────────────────── */}
-        <div className="mt-px grid grid-cols-2 lg:grid-cols-4 border border-gray-200 border-t-0">
+        {/* THEME CHANGE: border-gray-200 → #2a2a2a */}
+        <div
+          className="mt-px grid grid-cols-2 lg:grid-cols-4"
+          style={{ border: "1px solid #2a2a2a", borderTop: "none" }}
+        >
           {features.map((f, i) => {
             const Icon = f.icon;
             return (
@@ -184,20 +210,31 @@ const HowItWorksSection = () => {
                 key={i}
                 ref={(el) => (featuresRef.current[i] = el)}
                 className={`
-                  p-5
-                  ${i < features.length - 1 ? "border-b lg:border-b-0 border-r border-gray-200" : ""}
-                  ${i === 1 ? "border-r-0 lg:border-r border-gray-200" : ""}
-                  group hover:bg-gray-50 transition-colors duration-200
+                  p-5 group transition-colors duration-200
                   ${visibleFeatures.includes(i) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
                   transition-all duration-500
                 `}
-                style={{ transitionDelay: `${i * 80}ms` }}
+                style={{
+                  transitionDelay: `${i * 80}ms`,
+                  // THEME CHANGE: right/bottom borders → #2a2a2a
+                  borderRight: i < features.length - 1 ? "1px solid #2a2a2a" : "none",
+                  backgroundColor: "#111111",
+                }}
+                // THEME CHANGE: hover → slightly lighter charcoal
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#1a1a1a"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#111111"; }}
               >
-                <div className="w-8 h-8 bg-red-50 flex items-center justify-center mb-3">
-                  <Icon className="w-4 h-4 text-red-600" />
+                {/* THEME CHANGE: icon bg was bg-red-50 → dark crimson tint */}
+                <div
+                  className="w-8 h-8 flex items-center justify-center mb-3"
+                  style={{ backgroundColor: "#2a0000" }}
+                >
+                  <Icon className="w-4 h-4" style={{ color: "#CC0000" }} />
                 </div>
-                <h4 className="text-xs font-bold text-gray-900 mb-1">{f.title}</h4>
-                <p className="text-xs text-gray-500 leading-snug">{f.description}</p>
+                {/* THEME CHANGE: title was text-gray-900 → white */}
+                <h4 className="text-xs font-bold mb-1" style={{ color: "#FFFFFF" }}>{f.title}</h4>
+                {/* THEME CHANGE: desc was text-gray-500 → #999999 */}
+                <p className="text-xs leading-snug" style={{ color: "#999999" }}>{f.description}</p>
               </div>
             );
           })}
@@ -205,28 +242,41 @@ const HowItWorksSection = () => {
       </section>
 
       {/* ── Why Choose Us ────────────────────────────── */}
-      <section ref={whyRef} className="bg-gray-50 border-t border-gray-200 py-14">
+      {/* THEME CHANGE: was bg-gray-50 → slightly lighter dark #1a1a1a */}
+      <section
+        ref={whyRef}
+        className="py-14"
+        style={{ backgroundColor: "#1a1a1a", borderTop: "1px solid #2a2a2a" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Header */}
           <div className={`mb-10 transition-all duration-700 ${visibleWhy ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-            <p className="text-xs font-semibold tracking-widest text-red-600 uppercase mb-2">Our Strengths</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Why Choose Home Ease?</h2>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "#CC0000" }}>Our Strengths</p>
+            <h2 className="text-3xl md:text-4xl font-bold" style={{ color: "#FFFFFF" }}>Why Choose Home Ease?</h2>
           </div>
 
-          {/* Cards grid — 2 cols mobile, 3 desktop, sharp square */}
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-px bg-gray-200 border border-gray-200">
+          {/* Cards grid */}
+          {/* THEME CHANGE: bg-gray-200 gap → #2a2a2a, border → #2a2a2a */}
+          <div
+            className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-px"
+            style={{ backgroundColor: "#2a2a2a", border: "1px solid #2a2a2a" }}
+          >
             {whyChooseFeatures.map((item, index) => {
               const Icon = item.icon;
               return (
                 <div
                   key={index}
                   className={`
-                    bg-white group cursor-default overflow-hidden relative
+                    group cursor-default overflow-hidden relative
                     transition-all duration-500
                     ${visibleWhy ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}
                   `}
-                  style={{ transitionDelay: visibleWhy ? `${index * 70}ms` : "0ms" }}
+                  style={{
+                    transitionDelay: visibleWhy ? `${index * 70}ms` : "0ms",
+                    // THEME CHANGE: was bg-white → dark charcoal card
+                    backgroundColor: "#111111",
+                  }}
                 >
                   {/* Image */}
                   <div className="h-36 relative overflow-hidden">
@@ -236,11 +286,11 @@ const HowItWorksSection = () => {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                    {/* Gradient overlay — slightly deeper for dark theme */}
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)" }} />
 
-                    {/* Icon badge */}
-                    <div className="absolute top-2.5 left-2.5 bg-red-600 p-1.5">
+                    {/* Icon badge — THEME CHANGE: was bg-red-600 → #8B0000 */}
+                    <div className="absolute top-2.5 left-2.5 p-1.5" style={{ backgroundColor: "#8B0000" }}>
                       <Icon className="w-3.5 h-3.5 text-white" />
                     </div>
 
@@ -250,13 +300,19 @@ const HowItWorksSection = () => {
                     </div>
                   </div>
 
-                  {/* Description row */}
-                  <div className="px-3 py-2.5 border-t border-gray-100 group-hover:border-red-500 transition-colors duration-200">
-                    <p className="text-xs text-gray-500 leading-snug line-clamp-2">{item.description}</p>
+                  {/* Description row — THEME CHANGE: border → #2a2a2a, hover → #CC0000 */}
+                  <div
+                    className="px-3 py-2.5 transition-colors duration-200"
+                    style={{ borderTop: "1px solid #2a2a2a" }}
+                  >
+                    <p className="text-xs leading-snug line-clamp-2" style={{ color: "#999999" }}>{item.description}</p>
                   </div>
 
-                  {/* Bottom accent */}
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  {/* Bottom accent — THEME CHANGE: was bg-red-600 → #CC0000 */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"
+                    style={{ backgroundColor: "#CC0000" }}
+                  />
                 </div>
               );
             })}

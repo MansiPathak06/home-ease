@@ -3,12 +3,16 @@ const { pool } = require('../config/db');
 // GET USER PROFILE
 exports.getProfile = async (req, res) => {
   try {
+       console.log("=== getProfile called ===");
+    console.log("req.user:", req.user);
     const userId = req.user.userId;
+    console.log("userId:", userId);
 
     const result = await pool.query(
       'SELECT id, name, email, phone, location, created_at FROM users WHERE id = $1',
       [userId]
     );
+      console.log("DB result:", result.rows);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'User not found' });

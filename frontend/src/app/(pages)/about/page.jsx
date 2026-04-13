@@ -1,28 +1,38 @@
-// about/page.jsx
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  CheckCircle2, Rocket, MapPin, CreditCard, BarChart2,
-  Expand, Smartphone, Sparkles, ArrowRight, Users, Award, Star, Shield
+  CheckCircle2,
+  MapPin,
+  CreditCard,
+  BarChart2,
+  Expand,
+  Smartphone,
+  Sparkles,
+  Users,
+  Award,
+  Star,
+  Shield,
 } from "lucide-react";
 
+/* ── DATA ───────────────────────── */
+
 const keyFeatures = [
-  { icon: Users,       text: "Connects users instantly with trusted, skilled professionals" },
-  { icon: Shield,      text: "Verified worker profiles with ratings for reliability" },
-  { icon: CheckCircle2,text: "Instant booking and direct communication with providers" },
-  { icon: Sparkles,    text: "User-friendly interface for quick search and seamless booking" },
-  { icon: BarChart2,   text: "Worker dashboard for profile, availability & job tracking" },
-  { icon: Award,       text: "Secure and scalable platform for large-scale deployment" },
-  { icon: Star,        text: "Built with modern web technologies for speed & responsiveness" },
+  { icon: Users, text: "Connects users instantly with trusted, skilled professionals" },
+  { icon: Shield, text: "Verified worker profiles with ratings for reliability" },
+  { icon: CheckCircle2, text: "Instant booking and direct communication with providers" },
+  { icon: Sparkles, text: "User-friendly interface for quick search and seamless booking" },
+  { icon: BarChart2, text: "Worker dashboard for profile, availability & job tracking" },
+  { icon: Award, text: "Secure and scalable platform for large-scale deployment" },
+  { icon: Star, text: "Built with modern web technologies for speed & responsiveness" },
 ];
 
 const futureObjectives = [
-  { icon: Sparkles,    text: "AI-powered recommendations for personalized worker suggestions" },
-  { icon: Smartphone,  text: "Dedicated mobile apps for Android and iOS" },
-  { icon: CreditCard,  text: "Online payment gateway for secure transactions" },
-  { icon: MapPin,      text: "Geo-location tracking for finding nearby services fast" },
-  { icon: BarChart2,   text: "Analytics dashboards for service quality monitoring" },
-  { icon: Expand,      text: "Expansion into new categories and cities" },
+  { icon: Sparkles, text: "AI-powered recommendations for personalized worker suggestions" },
+  { icon: Smartphone, text: "Dedicated mobile apps for Android and iOS" },
+  { icon: CreditCard, text: "Online payment gateway for secure transactions" },
+  { icon: MapPin, text: "Geo-location tracking for finding nearby services fast" },
+  { icon: BarChart2, text: "Analytics dashboards for service quality monitoring" },
+  { icon: Expand, text: "Expansion into new categories and cities" },
 ];
 
 const stats = [
@@ -31,6 +41,8 @@ const stats = [
   { number: "4.9★", label: "Avg Rating" },
   { number: "24/7", label: "Support" },
 ];
+
+/* ── COMPONENT ───────────────────── */
 
 export default function AboutPage() {
   const [visible, setVisible] = useState(false);
@@ -46,95 +58,99 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-white">
+    <main style={{ backgroundColor: "#111111" }} className="min-h-screen">
 
-      {/* ── Hero banner ───────────────────────────── */}
-      <section className="bg-red-600 border-b border-red-700">
+      {/* ── HERO ───────────────────── */}
+      <section style={{ backgroundColor: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-          <p className="text-xs font-semibold tracking-widest text-red-200 uppercase mb-3">About Us</p>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-3 leading-tight">
+          <p className="text-xs font-semibold uppercase mb-3" style={{ color: "#CC0000" }}>
+            About Us
+          </p>
+
+          <h1 className="text-4xl md:text-5xl font-black mb-3" style={{ color: "#FFFFFF" }}>
             Home Ease
           </h1>
-          <p className="text-red-100 text-base md:text-lg max-w-xl leading-relaxed mb-6">
-            A smart platform connecting households with verified professionals for on-demand home services — fast, reliable, and trusted.
+
+          <p className="max-w-xl mb-6" style={{ color: "#999999" }}>
+            A smart platform connecting households with verified professionals for on-demand home services.
           </p>
-          <button className="inline-flex items-center gap-2 bg-white text-red-600 hover:bg-red-50 font-bold py-2.5 px-6 text-sm transition-colors duration-200">
-            Book a Service <ArrowRight className="w-4 h-4" />
+
+          <button
+            className="px-6 py-2.5 font-bold text-sm"
+            style={{ backgroundColor: "#CC0000", color: "#fff" }}
+          >
+            Explore Services
           </button>
         </div>
       </section>
 
-      {/* ── Stats strip ───────────────────────────── */}
-      <section className="border-b border-gray-200">
+      {/* ── STATS ───────────────────── */}
+      <section style={{ borderBottom: "1px solid #2a2a2a" }}>
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-gray-200">
+          <div className="grid grid-cols-2 md:grid-cols-4" style={{ border: "1px solid #2a2a2a" }}>
             {stats.map((s, i) => (
-              <div key={i} className="px-6 py-7 group hover:bg-red-600 transition-colors duration-200">
-                <div className="text-2xl font-black text-gray-900 group-hover:text-white transition-colors duration-200">{s.number}</div>
-                <div className="text-xs text-gray-500 group-hover:text-red-100 font-medium mt-0.5 transition-colors duration-200">{s.label}</div>
+              <div
+                key={i}
+                className="px-6 py-7"
+                style={{
+                  borderRight: "1px solid #2a2a2a",
+                  borderBottom: "1px solid #2a2a2a",
+                }}
+              >
+                <div className="text-2xl font-black text-white">{s.number}</div>
+                <div className="text-xs text-gray-400">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Main content ──────────────────────────── */}
+      {/* ── MAIN ───────────────────── */}
       <section ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-gray-200 border border-gray-200">
+        <div className="grid lg:grid-cols-2 gap-px" style={{ backgroundColor: "#2a2a2a" }}>
 
-          {/* Key Features */}
-          <div className={`bg-white p-8 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <p className="text-xs font-semibold tracking-widest text-red-600 uppercase mb-2">What We Offer</p>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Key Features</h2>
-            <div className="space-y-4">
-              {keyFeatures.map((f, i) => {
-                const Icon = f.icon;
-                return (
-                  <div key={i} className="flex items-start gap-3 group">
-                    <div className="w-7 h-7 bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-red-600 transition-colors duration-200">
-                      <Icon className="w-3.5 h-3.5 text-red-600 group-hover:text-white transition-colors duration-200" />
-                    </div>
-                    <p className="text-sm text-gray-600 leading-snug">{f.text}</p>
-                  </div>
-                );
-              })}
-            </div>
+          {/* FEATURES */}
+          <div className={`p-8 ${visible ? "opacity-100" : "opacity-0"}`} style={{ backgroundColor: "#111111" }}>
+            <p style={{ color: "#CC0000" }} className="text-xs uppercase mb-2">What We Offer</p>
+            <h2 className="text-2xl font-bold text-white mb-6">Key Features</h2>
+
+            {keyFeatures.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <div key={i} className="flex gap-3 mb-4">
+                  <Icon className="w-4 h-4" style={{ color: "#CC0000" }} />
+                  <p style={{ color: "#999999" }}>{f.text}</p>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Future Objectives */}
-          <div className={`bg-white p-8 transition-all duration-700 delay-150 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <p className="text-xs font-semibold tracking-widest text-red-600 uppercase mb-2">What's Coming</p>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Future Objectives</h2>
-            <div className="space-y-4">
-              {futureObjectives.map((f, i) => {
-                const Icon = f.icon;
-                return (
-                  <div key={i} className="flex items-start gap-3 group">
-                    <div className="w-7 h-7 bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-red-600 transition-colors duration-200">
-                      <Icon className="w-3.5 h-3.5 text-red-600 group-hover:text-white transition-colors duration-200" />
-                    </div>
-                    <p className="text-sm text-gray-600 leading-snug">{f.text}</p>
-                  </div>
-                );
-              })}
-            </div>
+          {/* FUTURE */}
+          <div className={`p-8 ${visible ? "opacity-100" : "opacity-0"}`} style={{ backgroundColor: "#111111" }}>
+            <p style={{ color: "#CC0000" }} className="text-xs uppercase mb-2">What's Coming</p>
+            <h2 className="text-2xl font-bold text-white mb-6">Future Objectives</h2>
+
+            {futureObjectives.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <div key={i} className="flex gap-3 mb-4">
+                  <Icon className="w-4 h-4" style={{ color: "#CC0000" }} />
+                  <p style={{ color: "#999999" }}>{f.text}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* ── Mission statement ─────────────────── */}
-        <div className={`mt-px border border-gray-200 border-t-0 bg-red-600 p-8 md:p-10 transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="max-w-3xl mx-auto text-center">
-            <p className="text-xs font-semibold tracking-widest text-red-200 uppercase mb-3">Our Mission</p>
-            <h2 className="text-2xl md:text-3xl font-black text-white mb-4 leading-tight">
-              Empowering Digital Transformation
-            </h2>
-            <p className="text-red-100 text-sm md:text-base leading-relaxed">
-              HomeEase aims to modernize home service access, create job opportunities, and bring digital empowerment to households and workers alike — building a future where quality service is just a tap away.
-            </p>
-          </div>
+        {/* ── MISSION ───────────────── */}
+        <div className="mt-6 p-8 text-center" style={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <p style={{ color: "#CC0000" }} className="text-xs uppercase mb-2">Our Mission</p>
+          <h2 className="text-2xl font-bold text-white mb-3">Empowering Digital Transformation</h2>
+          <p style={{ color: "#999999" }}>
+            HomeEase aims to modernize home service access and create job opportunities through technology.
+          </p>
         </div>
       </section>
-
     </main>
   );
 }
