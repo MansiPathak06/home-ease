@@ -14,16 +14,17 @@ const fmt = (n) =>
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-function StatCard({ label, value, icon: Icon, color, sub, subColor = "text-gray-400" }) {
+function StatCard({ label, value, icon: Icon, borderColor, sub, subColor }) {
   return (
-    <div className={`bg-white rounded-lg border-l-4 ${color} shadow-sm p-4 flex items-center justify-between`}>
+    <div className="rounded-lg shadow-sm p-4 flex items-center justify-between"
+      style={{ background: "#1C1010", borderLeft: `4px solid ${borderColor}` }}>
       <div>
-        <p className="text-xs text-gray-500 font-medium">{label}</p>
-        <p className="text-xl font-bold text-gray-900 mt-0.5">{value}</p>
-        {sub && <p className={`text-xs mt-0.5 ${subColor}`}>{sub}</p>}
+        <p className="text-xs font-medium" style={{ color: "#aaa" }}>{label}</p>
+        <p className="text-xl font-bold text-white mt-0.5">{value}</p>
+        {sub && <p className="text-xs mt-0.5" style={{ color: subColor ?? "#888" }}>{sub}</p>}
       </div>
-      <div className="p-2 rounded-lg bg-gray-50">
-        <Icon className="w-5 h-5 text-gray-400" />
+      <div className="p-2 rounded-lg" style={{ background: "#2a1212" }}>
+        <Icon className="w-5 h-5" style={{ color: borderColor }} />
       </div>
     </div>
   );
@@ -37,71 +38,73 @@ function PaymentModal({ booking, onClose, onMarkPaid }) {
   const adminEarn  = price - vendorPay;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl">
-        <div className="flex justify-between items-center border-b px-6 py-4">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="rounded-xl w-full max-w-lg shadow-2xl" style={{ background: "#1C1010", border: "1px solid #3a1a1a" }}>
+        <div className="flex justify-between items-center px-6 py-4" style={{ borderBottom: "1px solid #3a1a1a" }}>
           <div>
-            <h3 className="font-bold text-gray-900">Payment Detail</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Booking #{booking.id}</p>
+            <h3 className="font-bold text-white">Payment Detail</h3>
+            <p className="text-xs mt-0.5" style={{ color: "#888" }}>Booking #{booking.id}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg">
-            <X className="w-5 h-5 text-gray-500" />
+          <button onClick={onClose} className="p-1.5 rounded-lg transition-colors"
+            style={{ background: "transparent" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#2a1212"}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            <X className="w-5 h-5" style={{ color: "#aaa" }} />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           {/* Parties */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="text-xs text-gray-500 font-semibold mb-1">Customer</p>
-              <p className="text-xs font-bold text-gray-900">{booking.user_name ?? booking.customer_name ?? "—"}</p>
-              <p className="text-xs text-gray-500">{booking.user_email}</p>
+            <div className="rounded-lg p-3" style={{ background: "#2a1212" }}>
+              <p className="text-xs font-semibold mb-1" style={{ color: "#888" }}>Customer</p>
+              <p className="text-xs font-bold text-white">{booking.user_name ?? booking.customer_name ?? "—"}</p>
+              <p className="text-xs" style={{ color: "#888" }}>{booking.user_email}</p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="text-xs text-gray-500 font-semibold mb-1">Vendor</p>
-              <p className="text-xs font-bold text-gray-900">{booking.vendor_name ?? "Unassigned"}</p>
-              <p className="text-xs text-gray-500">{booking.service_category}</p>
+            <div className="rounded-lg p-3" style={{ background: "#2a1212" }}>
+              <p className="text-xs font-semibold mb-1" style={{ color: "#888" }}>Vendor</p>
+              <p className="text-xs font-bold text-white">{booking.vendor_name ?? "Unassigned"}</p>
+              <p className="text-xs" style={{ color: "#888" }}>{booking.service_category}</p>
             </div>
           </div>
 
           {/* Breakdown */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 space-y-2">
-            <p className="text-xs font-bold text-gray-700 mb-3">💰 Payment Breakdown</p>
+          <div className="rounded-lg p-4 space-y-2" style={{ background: "#1a2a1a", border: "1px solid #1a3a1a" }}>
+            <p className="text-xs font-bold text-white mb-3">💰 Payment Breakdown</p>
             {[
-              ["Service",         booking.service_name, "text-gray-700"],
-              ["Date",            fmtDate(booking.date), "text-gray-700"],
-              ["Payment Method",  (booking.payment_method ?? "cod").toUpperCase(), "text-gray-700"],
-              ["Payment Status",  booking.payment_status ?? "pending", "text-gray-700"],
-            ].map(([l, v, c]) => (
+              ["Service",         booking.service_name],
+              ["Date",            fmtDate(booking.date)],
+              ["Payment Method",  (booking.payment_method ?? "cod").toUpperCase()],
+              ["Payment Status",  booking.payment_status ?? "pending"],
+            ].map(([l, v]) => (
               <div key={l} className="flex justify-between text-xs">
-                <span className="text-gray-500">{l}</span>
-                <span className={`font-semibold capitalize ${c}`}>{v}</span>
+                <span style={{ color: "#888" }}>{l}</span>
+                <span className="font-semibold capitalize text-white">{v}</span>
               </div>
             ))}
-            <div className="border-t border-green-200 pt-2 mt-2 space-y-1.5">
+            <div className="pt-2 mt-2 space-y-1.5" style={{ borderTop: "1px solid #1a3a1a" }}>
               <div className="flex justify-between text-xs">
-                <span className="text-gray-600">Total Booking Value</span>
-                <span className="font-bold text-gray-800">{fmt(price)}</span>
+                <span style={{ color: "#aaa" }}>Total Booking Value</span>
+                <span className="font-bold text-white">{fmt(price)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-gray-600">Admin Commission ({pct}%)</span>
-                <span className="font-bold text-blue-700">{fmt(adminEarn)}</span>
+                <span style={{ color: "#aaa" }}>Admin Commission ({pct}%)</span>
+                <span className="font-bold" style={{ color: "#60a5fa" }}>{fmt(adminEarn)}</span>
               </div>
-              <div className="flex justify-between text-xs border-t border-green-200 pt-1.5">
-                <span className="font-bold text-gray-700">Vendor Payout</span>
-                <span className="font-bold text-green-700 text-sm">{fmt(vendorPay)}</span>
+              <div className="flex justify-between text-xs pt-1.5" style={{ borderTop: "1px solid #1a3a1a" }}>
+                <span className="font-bold text-white">Vendor Payout</span>
+                <span className="font-bold text-sm" style={{ color: "#4ade80" }}>{fmt(vendorPay)}</span>
               </div>
             </div>
           </div>
 
           {/* Payout status */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-            <span className="text-xs font-semibold text-gray-600">Payout Status</span>
-            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-              booking.payout_status === "paid"
-                ? "bg-green-100 text-green-700"
-                : "bg-orange-100 text-orange-700"
-            }`}>
+          <div className="flex items-center justify-between rounded-lg p-3" style={{ background: "#2a1212" }}>
+            <span className="text-xs font-semibold" style={{ color: "#aaa" }}>Payout Status</span>
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full"
+              style={booking.payout_status === "paid"
+                ? { background: "#0a2a0a", color: "#4ade80" }
+                : { background: "#2a1a00", color: "#fb923c" }}>
               {booking.payout_status === "paid" ? "✓ Paid to Vendor" : "⏳ Pending"}
             </span>
           </div>
@@ -110,12 +113,18 @@ function PaymentModal({ booking, onClose, onMarkPaid }) {
           <div className="flex gap-3 pt-2">
             {booking.payout_status !== "paid" && booking.status === "completed" && price > 0 && (
               <button onClick={() => onMarkPaid(booking.id)}
-                className="flex-1 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 flex items-center justify-center gap-2">
+                className="flex-1 py-2.5 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+                style={{ background: "#16a34a" }}
+                onMouseEnter={e => e.currentTarget.style.background = "#15803d"}
+                onMouseLeave={e => e.currentTarget.style.background = "#16a34a"}>
                 <CheckCircle className="w-4 h-4" /> Mark Payout Paid
               </button>
             )}
             <button onClick={onClose}
-              className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200">
+              className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+              style={{ background: "#2a1212", color: "#ccc" }}
+              onMouseEnter={e => e.currentTarget.style.background = "#3a1a1a"}
+              onMouseLeave={e => e.currentTarget.style.background = "#2a1212"}>
               Close
             </button>
           </div>
@@ -150,10 +159,7 @@ export default function AdminPaymentsSection() {
         api.admin.getBookings({ ...filters, status: filters.bookingStatus }),
         api.admin.getBookingStats()
       ]);
-      if (bRes.success) {
-        // Only show bookings that have a price set (actual payment records)
-        setBookings(bRes.bookings);
-      }
+      if (bRes.success) setBookings(bRes.bookings);
       if (sRes.success) setStats(sRes.stats);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -171,130 +177,111 @@ export default function AdminPaymentsSection() {
   const clearFilters = () => setFilters({ search: "", paymentMethod: "", payoutStatus: "", bookingStatus: "", dateFrom: "", dateTo: "" });
   const activeCount = Object.values(filters).filter(Boolean).length;
 
-  // Filter bookings client-side for payout status (already filtered server-side for rest)
   const visible = bookings.filter(b => {
     if (filters.payoutStatus && b.payout_status !== filters.payoutStatus) return false;
     return true;
   });
 
-  // Revenue by method
-  const onlineTotal  = visible.filter(b => b.payment_method === "online").reduce((s, b) => s + parseFloat(b.service_price ?? b.amount ?? 0), 0);
-  const codTotal     = visible.filter(b => b.payment_method === "cod"   ).reduce((s, b) => s + parseFloat(b.service_price ?? b.amount ?? 0), 0);
+  const onlineTotal   = visible.filter(b => b.payment_method === "online").reduce((s, b) => s + parseFloat(b.service_price ?? b.amount ?? 0), 0);
+  const codTotal      = visible.filter(b => b.payment_method === "cod").reduce((s, b) => s + parseFloat(b.service_price ?? b.amount ?? 0), 0);
   const pendingPayout = visible.filter(b => b.payout_status === "pending" && b.status === "completed").reduce((s, b) => s + parseFloat(b.vendor_payout ?? 0), 0);
+
+  // Shared input style helpers
+  const inputStyle = { background: "#2a1212", color: "#fff", border: "1px solid #3a1a1a" };
+  const onFocus = e => e.target.style.border = "1px solid #C0392B";
+  const onBlur  = e => e.target.style.border = "1px solid #3a1a1a";
 
   return (
     <div className="space-y-5">
 
       {/* ── Stats Row ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard
-          label="Total Revenue"
-          value={fmt(stats?.totalRevenue ?? 0)}
-          icon={IndianRupee} color="border-green-500"
-          sub={`Admin keeps ${fmt(stats?.totalAdminEarnings ?? 0)}`}
-          subColor="text-green-600"
-        />
-        <StatCard
-          label="Vendor Payouts"
-          value={fmt(stats?.totalVendorPayout ?? 0)}
-          icon={TrendingUp} color="border-blue-500"
-          sub={`${stats?.payoutPaid ?? 0} paid, ${stats?.payoutPending ?? 0} pending`}
-        />
-        <StatCard
-          label="Online Payments"
-          value={fmt(onlineTotal)}
-          icon={CreditCard} color="border-purple-500"
-          sub={`${visible.filter(b => b.payment_method === "online").length} transactions`}
-        />
-        <StatCard
-          label="COD Payments"
-          value={fmt(codTotal)}
-          icon={Banknote} color="border-orange-500"
-          sub={`${visible.filter(b => b.payment_method === "cod").length} transactions`}
-        />
+        <StatCard label="Total Revenue"    value={fmt(stats?.totalRevenue ?? 0)}        icon={IndianRupee} borderColor="#22c55e"  sub={`Admin keeps ${fmt(stats?.totalAdminEarnings ?? 0)}`} subColor="#4ade80" />
+        <StatCard label="Vendor Payouts"   value={fmt(stats?.totalVendorPayout ?? 0)}   icon={TrendingUp}  borderColor="#60a5fa"  sub={`${stats?.payoutPaid ?? 0} paid, ${stats?.payoutPending ?? 0} pending`} subColor="#93c5fd" />
+        <StatCard label="Online Payments"  value={fmt(onlineTotal)}                      icon={CreditCard}  borderColor="#a78bfa"  sub={`${visible.filter(b => b.payment_method === "online").length} transactions`} subColor="#c4b5fd" />
+        <StatCard label="COD Payments"     value={fmt(codTotal)}                         icon={Banknote}    borderColor="#fb923c"  sub={`${visible.filter(b => b.payment_method === "cod").length} transactions`} subColor="#fdba74" />
       </div>
 
       {/* Pending payouts alert */}
       {pendingPayout > 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 flex items-center gap-3">
-          <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0" />
-          <p className="text-xs text-orange-700 font-semibold">
+        <div className="rounded-lg px-4 py-3 flex items-center gap-3"
+          style={{ background: "#2a1a00", border: "1px solid #78350f" }}>
+          <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: "#fb923c" }} />
+          <p className="text-xs font-semibold" style={{ color: "#fb923c" }}>
             {fmt(pendingPayout)} in vendor payouts are pending for completed bookings
           </p>
-          <button
-            onClick={() => setFilter("payoutStatus", "pending")}
-            className="ml-auto text-xs bg-orange-600 text-white px-3 py-1 rounded-md font-semibold hover:bg-orange-700"
-          >
+          <button onClick={() => setFilter("payoutStatus", "pending")}
+            className="ml-auto text-xs text-white px-3 py-1 rounded-md font-semibold transition-colors"
+            style={{ background: "#C0392B" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#a93226"}
+            onMouseLeave={e => e.currentTarget.style.background = "#C0392B"}>
             View All
           </button>
         </div>
       )}
 
       {/* ── Filters ── */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+      <div className="rounded-lg p-4 space-y-3" style={{ background: "#1C1010", border: "1px solid #3a1a1a" }}>
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#888" }} />
             <input type="text" placeholder="Search by booking ID, customer, vendor..."
               value={filters.search} onChange={e => setFilter("search", e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500" />
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg outline-none"
+              style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
           </div>
           <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
-              showFilters || activeCount > 0 ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-600 border-gray-300"
-            }`}>
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all"
+            style={showFilters || activeCount > 0
+              ? { background: "#C0392B", color: "#fff", border: "1px solid #C0392B" }
+              : { background: "transparent", color: "#aaa", border: "1px solid #3a1a1a" }}>
             <Filter className="w-4 h-4" />
             Filters {activeCount > 0 && `(${activeCount})`}
           </button>
-          <button onClick={loadData} className="p-2 hover:bg-gray-100 rounded-lg border border-gray-300">
-            <RefreshCw className="w-4 h-4 text-gray-500" />
+          <button onClick={loadData}
+            className="p-2 rounded-lg border transition-colors"
+            style={{ border: "1px solid #3a1a1a", background: "transparent" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#2a1212"}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            <RefreshCw className="w-4 h-4" style={{ color: "#aaa" }} />
           </button>
         </div>
 
         {showFilters && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2" style={{ borderTop: "1px solid #3a1a1a" }}>
+            {[
+              { label: "Payment Method", key: "paymentMethod", options: [["", "All Methods"], ["online", "Online"], ["cod", "COD"]] },
+              { label: "Payout Status",  key: "payoutStatus",  options: [["", "All Payouts"], ["pending", "Pending"], ["paid", "Paid"]] },
+              { label: "Booking Status", key: "bookingStatus", options: [["", "All Statuses"], ...["pending","approved","completed","cancelled"].map(s => [s, s.charAt(0).toUpperCase() + s.slice(1)])] },
+            ].map(({ label, key, options }) => (
+              <div key={key}>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "#aaa" }}>{label}</label>
+                <select value={filters[key]} onChange={e => setFilter(key, e.target.value)}
+                  className="w-full px-2 py-1.5 text-sm rounded-lg outline-none"
+                  style={inputStyle} onFocus={onFocus} onBlur={onBlur}>
+                  {options.map(([v, l]) => <option key={v} value={v} style={{ background: "#1C1010" }}>{l}</option>)}
+                </select>
+              </div>
+            ))}
             <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1 block">Payment Method</label>
-              <select value={filters.paymentMethod} onChange={e => setFilter("paymentMethod", e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg">
-                <option value="">All Methods</option>
-                <option value="online">Online</option>
-                <option value="cod">COD</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1 block">Payout Status</label>
-              <select value={filters.payoutStatus} onChange={e => setFilter("payoutStatus", e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg">
-                <option value="">All Payouts</option>
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1 block">Booking Status</label>
-              <select value={filters.bookingStatus} onChange={e => setFilter("bookingStatus", e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg">
-                <option value="">All Statuses</option>
-                {["pending","approved","completed","cancelled"].map(s => (
-                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1 block">From Date</label>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: "#aaa" }}>From Date</label>
               <input type="date" value={filters.dateFrom} onChange={e => setFilter("dateFrom", e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg" />
+                className="w-full px-2 py-1.5 text-sm rounded-lg outline-none"
+                style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1 block">To Date</label>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: "#aaa" }}>To Date</label>
               <input type="date" value={filters.dateTo} onChange={e => setFilter("dateTo", e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg" />
+                className="w-full px-2 py-1.5 text-sm rounded-lg outline-none"
+                style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
             </div>
             {activeCount > 0 && (
               <div className="flex items-end">
                 <button onClick={clearFilters}
-                  className="w-full px-3 py-1.5 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 font-medium">
+                  className="w-full px-3 py-1.5 text-sm rounded-lg font-medium transition-colors"
+                  style={{ color: "#C0392B", border: "1px solid #3a1a1a", background: "transparent" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#2a0a0a"}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                   Clear All
                 </button>
               </div>
@@ -305,99 +292,116 @@ export default function AdminPaymentsSection() {
 
       {/* ── Toast ── */}
       {toast.text && (
-        <div className={`px-4 py-2.5 rounded-lg text-sm font-semibold text-center ${
-          toast.type === "error" ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"
-        }`}>{toast.text}</div>
+        <div className="px-4 py-2.5 rounded-lg text-sm font-semibold text-center"
+          style={toast.type === "error"
+            ? { background: "#2a0a0a", color: "#f87171", border: "1px solid #7f1d1d" }
+            : { background: "#0a2a0a", color: "#4ade80", border: "1px solid #14532d" }}>
+          {toast.text}
+        </div>
       )}
 
       {/* ── Payments Table ── */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-          <p className="text-sm font-semibold text-gray-700">
+      <div className="rounded-lg overflow-hidden" style={{ background: "#1C1010", border: "1px solid #3a1a1a" }}>
+        <div className="px-4 py-3 flex justify-between items-center" style={{ borderBottom: "1px solid #3a1a1a" }}>
+          <p className="text-sm font-semibold text-white">
             {loading ? "Loading..." : `${visible.length} payment records`}
           </p>
-          <div className="flex gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-400 inline-block"></span>Paid</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-400 inline-block"></span>Pending</span>
+          <div className="flex gap-3 text-xs" style={{ color: "#888" }}>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ background: "#4ade80" }}></span>Paid</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ background: "#fb923c" }}></span>Pending</span>
           </div>
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-gray-400 text-sm">Loading payments...</div>
+          <div className="py-20 text-center text-sm" style={{ color: "#888" }}>Loading payments...</div>
         ) : visible.length === 0 ? (
           <div className="py-20 text-center">
-            <IndianRupee className="w-10 h-10 text-gray-200 mx-auto mb-2" />
-            <p className="text-gray-400 text-sm">No payment records found</p>
+            <IndianRupee className="w-10 h-10 mx-auto mb-2" style={{ color: "#3a1a1a" }} />
+            <p className="text-sm" style={{ color: "#888" }}>No payment records found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead style={{ background: "#2a1212", borderBottom: "1px solid #3a1a1a" }}>
                 <tr>
                   {["Booking","Customer","Vendor","Method","Booking Value","Admin Earns","Vendor Gets","Payout","Actions"].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold whitespace-nowrap" style={{ color: "#aaa" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody>
                 {visible.map(b => {
-                  const price     = parseFloat(b.service_price ?? b.amount ?? 0);
-                  const pct       = parseFloat(b.commission_pct ?? 15);
-                  const vendor    = parseFloat(b.vendor_payout ?? price * (1 - pct / 100));
-                  const admin     = price - vendor;
+                  const price  = parseFloat(b.service_price ?? b.amount ?? 0);
+                  const pct    = parseFloat(b.commission_pct ?? 15);
+                  const vendor = parseFloat(b.vendor_payout ?? price * (1 - pct / 100));
+                  const admin  = price - vendor;
 
                   return (
-                    <tr key={b.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={b.id} className="transition-colors"
+                      style={{ borderBottom: "1px solid #2a1212" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "#231010"}
+                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                       <td className="px-4 py-3">
-                        <p className="font-mono text-xs font-bold text-gray-700">#{b.id}</p>
-                        <p className="text-xs text-gray-400">{fmtDate(b.date)}</p>
-                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
-                          b.status === "completed" ? "bg-green-100 text-green-700" :
-                          b.status === "cancelled" ? "bg-gray-100 text-gray-500" :
-                          "bg-yellow-100 text-yellow-700"
-                        }`}>{b.status}</span>
+                        <p className="font-mono text-xs font-bold" style={{ color: "#aaa" }}>#{b.id}</p>
+                        <p className="text-xs" style={{ color: "#666" }}>{fmtDate(b.date)}</p>
+                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                          style={
+                            b.status === "completed" ? { background: "#0a2a0a", color: "#4ade80" } :
+                            b.status === "cancelled" ? { background: "#2a2a2a", color: "#888" } :
+                            { background: "#2a1a00", color: "#fbbf24" }
+                          }>{b.status}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-medium text-gray-900">{b.user_name ?? b.customer_name ?? "—"}</p>
-                        <p className="text-xs text-gray-400">{b.user_phone}</p>
+                        <p className="text-xs font-medium text-white">{b.user_name ?? b.customer_name ?? "—"}</p>
+                        <p className="text-xs" style={{ color: "#666" }}>{b.user_phone}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-medium text-gray-900">{b.vendor_name ?? "—"}</p>
-                        <p className="text-xs text-gray-400">{b.service_name}</p>
+                        <p className="text-xs font-medium text-white">{b.vendor_name ?? "—"}</p>
+                        <p className="text-xs" style={{ color: "#666" }}>{b.service_name}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                          b.payment_method === "online" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-600"
-                        }`}>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                          style={b.payment_method === "online"
+                            ? { background: "#2e1a4a", color: "#a78bfa" }
+                            : { background: "#2a2a2a", color: "#aaa" }}>
                           {(b.payment_method ?? "cod").toUpperCase()}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-bold text-gray-800">{price > 0 ? fmt(price) : <span className="text-gray-300">Not set</span>}</p>
+                        <p className="text-xs font-bold text-white">
+                          {price > 0 ? fmt(price) : <span style={{ color: "#444" }}>Not set</span>}
+                        </p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-bold text-blue-700">{price > 0 ? fmt(admin) : "—"}</p>
-                        {price > 0 && <p className="text-xs text-gray-400">{pct}%</p>}
+                        <p className="text-xs font-bold" style={{ color: "#60a5fa" }}>{price > 0 ? fmt(admin) : "—"}</p>
+                        {price > 0 && <p className="text-xs" style={{ color: "#666" }}>{pct}%</p>}
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-bold text-green-700">{price > 0 ? fmt(vendor) : "—"}</p>
+                        <p className="text-xs font-bold" style={{ color: "#4ade80" }}>{price > 0 ? fmt(vendor) : "—"}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                          b.payout_status === "paid" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
-                        }`}>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                          style={b.payout_status === "paid"
+                            ? { background: "#0a2a0a", color: "#4ade80" }
+                            : { background: "#2a1a00", color: "#fb923c" }}>
                           {b.payout_status === "paid" ? "✓ Paid" : "⏳ Pending"}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1.5">
                           <button onClick={() => setSelected(b)}
-                            className="flex items-center gap-1 px-2.5 py-1 bg-red-600 text-white rounded-md text-xs font-semibold hover:bg-red-700">
+                            className="flex items-center gap-1 px-2.5 py-1 text-white rounded-md text-xs font-semibold transition-colors"
+                            style={{ background: "#C0392B" }}
+                            onMouseEnter={e => e.currentTarget.style.background = "#a93226"}
+                            onMouseLeave={e => e.currentTarget.style.background = "#C0392B"}>
                             <Eye className="w-3 h-3" /> Detail
                           </button>
                           {b.payout_status !== "paid" && b.status === "completed" && price > 0 && (
                             <button onClick={() => handleMarkPaid(b.id)}
-                              className="flex items-center gap-1 px-2.5 py-1 bg-green-600 text-white rounded-md text-xs font-semibold hover:bg-green-700">
+                              className="flex items-center gap-1 px-2.5 py-1 text-white rounded-md text-xs font-semibold transition-colors"
+                              style={{ background: "#16a34a" }}
+                              onMouseEnter={e => e.currentTarget.style.background = "#15803d"}
+                              onMouseLeave={e => e.currentTarget.style.background = "#16a34a"}>
                               <CheckCircle className="w-3 h-3" /> Pay Out
                             </button>
                           )}

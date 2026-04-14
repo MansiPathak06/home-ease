@@ -13,21 +13,33 @@ import {
 const gp = (v, camel, snake, fallback = "") =>
   ((v?.[camel] || v?.[snake] || fallback) ?? "").toString();
 
+// ─── HomeEase Dark Palette ─────────────────────────────────
+// bg-page:    #0f0f0f   (deepest background)
+// bg-card:    #1a1a1a   (card / panel surface)
+// bg-elevated:#232323   (nested surfaces)
+// bg-input:   #2a2a2a   (inputs, secondary surfaces)
+// border:     #2e2e2e   (subtle borders)
+// text-pri:   #f0f0f0   (primary text)
+// text-sec:   #a0a0a0   (muted text)
+// crimson:    #C0202A   (brand primary)
+// crimson-hov:#a01820   (hover)
+
 const STATUS_CFG = {
-  pending:     { bg: "bg-yellow-100",  text: "text-yellow-700",  dot: "bg-yellow-500",  label: "Pending"     },
-  approved:    { bg: "bg-blue-100",    text: "text-blue-700",    dot: "bg-blue-500",    label: "Approved"    },
-  confirmed:   { bg: "bg-blue-100",    text: "text-blue-700",    dot: "bg-blue-500",    label: "Confirmed"   },
-  completed:   { bg: "bg-green-100",   text: "text-green-700",   dot: "bg-green-500",   label: "Completed"   },
-  rejected:    { bg: "bg-red-100",     text: "text-red-700",     dot: "bg-red-500",     label: "Rejected"    },
-  cancelled:   { bg: "bg-gray-100",    text: "text-gray-600",    dot: "bg-gray-400",    label: "Cancelled"   },
-  rescheduled: { bg: "bg-purple-100",  text: "text-purple-700",  dot: "bg-purple-500",  label: "Rescheduled" },
+  pending:     { bg: "#2a2200", text: "#f0b429", dot: "#f0b429", label: "Pending"     },
+  approved:    { bg: "#001a2e", text: "#4da6ff", dot: "#4da6ff", label: "Approved"    },
+  confirmed:   { bg: "#001a2e", text: "#4da6ff", dot: "#4da6ff", label: "Confirmed"   },
+  completed:   { bg: "#001a0a", text: "#4caf7d", dot: "#4caf7d", label: "Completed"   },
+  rejected:    { bg: "#1f0508", text: "#f07070", dot: "#f07070", label: "Rejected"    },
+  cancelled:   { bg: "#1e1e1e", text: "#888888", dot: "#666666", label: "Cancelled"   },
+  rescheduled: { bg: "#1a0a2e", text: "#b388ff", dot: "#9c6af7", label: "Rescheduled" },
 };
 
 const StatusBadge = ({ status }) => {
-  const cfg = STATUS_CFG[status?.toLowerCase()] || { bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400", label: status };
+  const cfg = STATUS_CFG[status?.toLowerCase()] || { bg: "#1e1e1e", text: "#888", dot: "#666", label: status };
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+      style={{ background: cfg.bg, color: cfg.text }}>
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: cfg.dot }} />
       {cfg.label}
     </span>
   );
@@ -39,6 +51,23 @@ const formatDate = (dateStr) => {
   return isNaN(d) ? dateStr : d.toLocaleDateString("en-IN", {
     day: "numeric", month: "short", year: "numeric"
   });
+};
+
+// ─── Hover-aware button (avoids inline onMouse* repetition) ──
+const Btn = ({ onClick, style, hoverStyle, className = "", children, disabled }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={className}
+      style={{ ...style, ...(hov ? hoverStyle : {}) }}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+    >
+      {children}
+    </button>
+  );
 };
 
 export default function UserDashboard() {
@@ -95,7 +124,7 @@ export default function UserDashboard() {
       isFav ? await api.user.removeFavorite(vendorId) : await api.user.addFavorite(vendorId);
       fetchData();
       showToast(isFav ? "Removed from favorites" : "Added to favorites");
-    } catch (err) {
+    } catch {
       showToast("Failed to update favorites", "error");
     }
   };
@@ -137,56 +166,60 @@ export default function UserDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f0f0f" }}>
         <div className="text-center">
-          <Loader2 className="w-10 h-10 text-red-600 animate-spin mx-auto mb-3" />
-          <p className="text-sm text-gray-500">Loading your dashboard...</p>
+          <Loader2 className="w-10 h-10 animate-spin mx-auto mb-3" style={{ color: "#C0202A" }} />
+          <p className="text-sm" style={{ color: "#777" }}>Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 mt-20">
+    <div className="min-h-screen mt-20" style={{ background: "#0f0f0f" }}>
 
       {/* ── Toast ── */}
       {toast.show && (
-        <div className={`fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${
-          toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
-        }`}>
-          {toast.type === "success" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+        <div className="fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white"
+          style={{ background: toast.type === "success" ? "#1a1a1a" : "#C0202A", border: "1px solid #333" }}>
+          {toast.type === "success"
+            ? <CheckCircle className="w-4 h-4" style={{ color: "#4caf7d" }} />
+            : <AlertCircle className="w-4 h-4" />}
           {toast.msg}
         </div>
       )}
 
-      {/* ── Header ── */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      {/* ── Sub-header (sits below the site navbar) ── */}
+      <header className="sticky top-0 z-40" style={{ background: "#1a1a1a", borderBottom: "1px solid #2e2e2e" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-xl font-bold text-red-600">EventBazaar</h1>
-              <p className="text-xs text-gray-500 mt-0.5">Find & book the perfect service</p>
+              <h1 className="text-xl font-bold" style={{ color: "#C0202A" }}>HomeEase</h1>
+              <p className="text-xs mt-0.5" style={{ color: "#666" }}>Find & book the perfect service</p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Browse Services CTA */}
-              <button
+              <Btn
                 onClick={() => router.push("/services")}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm font-semibold"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold"
+                style={{ background: "rgba(192,32,42,0.12)", color: "#e05060", border: "1px solid rgba(192,32,42,0.35)" }}
+                hoverStyle={{ background: "rgba(192,32,42,0.25)" }}
               >
-                Browse Services
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
+                Browse Services <ArrowUpRight className="w-3.5 h-3.5" />
+              </Btn>
 
-              <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-              <button
+              <Btn className="p-2 rounded-lg relative" style={{ color: "#aaa" }} hoverStyle={{ background: "#2a2a2a" }}>
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: "#C0202A" }} />
+              </Btn>
+
+              <Btn
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
+                style={{ background: "#C0202A" }}
+                hoverStyle={{ background: "#a01820" }}
               >
                 <LogOut className="w-4 h-4" /> Logout
-              </button>
+              </Btn>
             </div>
           </div>
         </div>
@@ -195,27 +228,33 @@ export default function UserDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         {/* ── Tabs ── */}
-        <div className="bg-white rounded-xl shadow-sm p-1.5 mb-6 flex gap-1 overflow-x-auto border border-gray-100">
+        <div className="rounded-xl p-1.5 mb-6 flex gap-1 overflow-x-auto"
+          style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
           {[
             { id: "bookings",  label: "My Bookings",  icon: Calendar, badge: bookings.filter(b => b.status === "pending").length },
             { id: "favorites", label: "Favorites",    icon: Heart,    badge: favorites.length },
             { id: "profile",   label: "Profile",      icon: User,     badge: 0 },
           ].map((tab) => (
-            <button
+            <Btn
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.id ? "bg-red-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"
-              }`}
+              className="relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
+              style={activeTab === tab.id
+                ? { background: "#C0202A", color: "#fff" }
+                : { color: "#a0a0a0" }}
+              hoverStyle={activeTab === tab.id ? {} : { background: "#2a2a2a", color: "#f0f0f0" }}
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
               {tab.badge > 0 && (
-                <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  activeTab === tab.id ? "bg-white text-red-600" : "bg-red-600 text-white"
-                }`}>{tab.badge}</span>
+                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                  style={activeTab === tab.id
+                    ? { background: "#fff", color: "#C0202A" }
+                    : { background: "#C0202A", color: "#fff" }}>
+                  {tab.badge}
+                </span>
               )}
-            </button>
+            </Btn>
           ))}
         </div>
 
@@ -223,91 +262,106 @@ export default function UserDashboard() {
         {activeTab === "bookings" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">My Bookings</h2>
-              <span className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">{bookings.length} total</span>
+              <h2 className="text-lg font-bold" style={{ color: "#f0f0f0" }}>My Bookings</h2>
+              <span className="text-xs px-2.5 py-1 rounded-full" style={{ color: "#777", background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+                {bookings.length} total
+              </span>
             </div>
+
             {bookings.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
-                <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium text-sm">No bookings yet</p>
-                <p className="text-gray-400 text-xs mt-1 mb-4">Head to Services to find and book a vendor</p>
-                <button
+              <div className="text-center py-16 rounded-xl" style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+                <Calendar className="w-12 h-12 mx-auto mb-3" style={{ color: "#2e2e2e" }} />
+                <p className="font-medium text-sm" style={{ color: "#666" }}>No bookings yet</p>
+                <p className="text-xs mt-1 mb-4" style={{ color: "#444" }}>Head to Services to find and book a vendor</p>
+                <Btn
                   onClick={() => router.push("/services")}
-                  className="px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 inline-flex items-center gap-1.5"
+                  className="px-5 py-2 text-white rounded-lg text-sm font-semibold inline-flex items-center gap-1.5"
+                  style={{ background: "#C0202A" }}
+                  hoverStyle={{ background: "#a01820" }}
                 >
                   Browse Services <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
+                </Btn>
               </div>
             ) : (
               <div className="space-y-3">
                 {bookings.map((b) => (
-                  <div key={b.id} className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                  <div key={b.id} className="rounded-xl overflow-hidden transition-all"
+                    style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = "#3e3e3e"}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = "#2e2e2e"}
+                  >
                     <div className="p-4">
                       <div className="flex flex-col sm:flex-row justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <h3 className="font-bold text-gray-900 text-sm truncate">
+                            <h3 className="font-bold text-sm truncate" style={{ color: "#f0f0f0" }}>
                               {b.vendor_name || b.vendorName || "Vendor"}
                             </h3>
                             <StatusBadge status={b.status} />
                           </div>
-                          <p className="text-xs text-gray-500 mb-2">
+                          <p className="text-xs mb-2" style={{ color: "#777" }}>
                             {b.service_name || b.serviceName || "Service"}
                           </p>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: "#777" }}>
                             {b.date && (
                               <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3 text-red-400" />{formatDate(b.date)}
+                                <Calendar className="w-3 h-3" style={{ color: "#C0202A" }} />{formatDate(b.date)}
                               </span>
                             )}
                             {b.time && (
                               <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3 text-red-400" /> {b.time}
+                                <Clock className="w-3 h-3" style={{ color: "#C0202A" }} /> {b.time}
                               </span>
                             )}
                             {(b.amount > 0) && (
-                              <span className="flex items-center gap-1 font-semibold text-gray-800">
-                                <IndianRupee className="w-3 h-3 text-green-500" />
+                              <span className="flex items-center gap-1 font-semibold" style={{ color: "#4caf7d" }}>
+                                <IndianRupee className="w-3 h-3" />
                                 {(b.amount || 0).toLocaleString("en-IN")}
                               </span>
                             )}
                           </div>
                           {b.vendor_response && (
-                            <p className="mt-2 text-xs text-blue-700 bg-blue-50 rounded-lg px-2.5 py-1.5">
+                            <p className="mt-2 text-xs rounded-lg px-2.5 py-1.5" style={{ color: "#4da6ff", background: "#001a2e" }}>
                               <span className="font-semibold">Vendor:</span> {b.vendor_response}
                             </p>
                           )}
                           {b.new_date && (
-                            <p className="mt-2 text-xs text-purple-700 bg-purple-50 rounded-lg px-2.5 py-1.5">
+                            <p className="mt-2 text-xs rounded-lg px-2.5 py-1.5" style={{ color: "#b388ff", background: "#1a0a2e" }}>
                               📅 Rescheduled to: <span className="font-semibold">{b.new_date} at {b.new_time}</span>
                             </p>
                           )}
                         </div>
 
                         <div className="flex sm:flex-col items-center sm:items-end gap-2">
-                          <button
+                          <Btn
                             onClick={() => setSelectedBooking(b)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-xs font-semibold transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                            style={{ background: "#232323", color: "#ccc", border: "1px solid #3a3a3a" }}
+                            hoverStyle={{ background: "#2e2e2e", color: "#fff" }}
                           >
                             <FileText className="w-3.5 h-3.5" /> View
-                          </button>
+                          </Btn>
 
                           {(b.status === "approved" || b.tracking_status === "en_route" || b.tracking_status === "arrived" || b.tracking_status === "in_service") && (
-                            <button
+                            <Btn
                               onClick={() => router.push(`/userdashboard/track/${b.id}`)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-xs font-semibold transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                              style={{ background: "#1a4a8a" }}
+                              hoverStyle={{ background: "#1556a0" }}
                             >
                               <Navigation className="w-3.5 h-3.5" /> Track
-                            </button>
+                            </Btn>
                           )}
 
                           {(b.status === "pending" || b.status === "approved" || b.status === "confirmed") && (
-                            <button
+                            <Btn
                               onClick={() => handleCancelOpen(b)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition-colors border border-red-200"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                              style={{ background: "rgba(192,32,42,0.1)", color: "#e05060", border: "1px solid rgba(192,32,42,0.3)" }}
+                              hoverStyle={{ background: "rgba(192,32,42,0.22)" }}
                             >
                               <XCircle className="w-3.5 h-3.5" /> Cancel
-                            </button>
+                            </Btn>
                           )}
                         </div>
                       </div>
@@ -323,20 +377,25 @@ export default function UserDashboard() {
         {activeTab === "favorites" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Saved Vendors</h2>
-              <span className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">{favorites.length} saved</span>
+              <h2 className="text-lg font-bold" style={{ color: "#f0f0f0" }}>Saved Vendors</h2>
+              <span className="text-xs px-2.5 py-1 rounded-full" style={{ color: "#777", background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+                {favorites.length} saved
+              </span>
             </div>
+
             {favorites.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
-                <Heart className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium text-sm">No favorites yet</p>
-                <p className="text-gray-400 text-xs mt-1 mb-4">Save vendors you like while browsing services</p>
-                <button
+              <div className="text-center py-16 rounded-xl" style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+                <Heart className="w-12 h-12 mx-auto mb-3" style={{ color: "#2e2e2e" }} />
+                <p className="font-medium text-sm" style={{ color: "#666" }}>No favorites yet</p>
+                <p className="text-xs mt-1 mb-4" style={{ color: "#444" }}>Save vendors you like while browsing services</p>
+                <Btn
                   onClick={() => router.push("/services")}
-                  className="px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 inline-flex items-center gap-1.5"
+                  className="px-5 py-2 text-white rounded-lg text-sm font-semibold inline-flex items-center gap-1.5"
+                  style={{ background: "#C0202A" }}
+                  hoverStyle={{ background: "#a01820" }}
                 >
                   Browse Services <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
+                </Btn>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -345,40 +404,50 @@ export default function UserDashboard() {
                   const vendor = vendors.find((v) => v.id === vid);
                   if (!vendor) return null;
                   return (
-                    <div key={fav.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-all">
+                    <div key={fav.id} className="rounded-xl p-4 transition-all"
+                      style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = "#3e3e3e"}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = "#2e2e2e"}
+                    >
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h3 className="font-bold text-gray-900 text-sm">{gp(vendor, "businessName", "business_name")}</h3>
-                          <p className="text-xs text-red-500 font-medium mt-0.5">{gp(vendor, "serviceCategory", "service_category")}</p>
+                          <h3 className="font-bold text-sm" style={{ color: "#f0f0f0" }}>{gp(vendor, "businessName", "business_name")}</h3>
+                          <p className="text-xs font-medium mt-0.5" style={{ color: "#C0202A" }}>{gp(vendor, "serviceCategory", "service_category")}</p>
                         </div>
-                        <button
+                        <Btn
                           onClick={() => toggleFavorite(vendor.id)}
-                          className="p-1.5 hover:bg-red-50 rounded-full transition-colors"
+                          className="p-1.5 rounded-full"
+                          style={{}}
+                          hoverStyle={{ background: "rgba(192,32,42,0.15)" }}
                         >
-                          <Heart className="w-4 h-4 fill-red-500 text-red-500" />
-                        </button>
+                          <Heart className="w-4 h-4" style={{ fill: "#C0202A", color: "#C0202A" }} />
+                        </Btn>
                       </div>
                       {(vendor.city || vendor.state) && (
-                        <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
+                        <p className="text-xs flex items-center gap-1 mb-3" style={{ color: "#555" }}>
                           <MapPin className="w-3 h-3" /> {[vendor.city, vendor.state].filter(Boolean).join(", ")}
                         </p>
                       )}
                       <div className="flex gap-2">
-                        <button
+                        <Btn
                           onClick={() => setSelectedVendor(vendor)}
-                          className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-xs font-semibold transition-colors"
+                          className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold"
+                          style={{ background: "#232323", color: "#ccc", border: "1px solid #3a3a3a" }}
+                          hoverStyle={{ background: "#2e2e2e", color: "#fff" }}
                         >
                           View Details
-                        </button>
-                        <button
+                        </Btn>
+                        <Btn
                           onClick={() => {
                             localStorage.setItem("selectedVendor", JSON.stringify(vendor));
                             router.push("/userdashboard/book");
                           }}
-                          className="flex-1 px-3 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg text-xs font-semibold transition-colors"
+                          className="flex-1 px-3 py-2 text-white rounded-lg text-xs font-semibold"
+                          style={{ background: "#C0202A" }}
+                          hoverStyle={{ background: "#a01820" }}
                         >
                           Book Now
-                        </button>
+                        </Btn>
                       </div>
                     </div>
                   );
@@ -390,20 +459,20 @@ export default function UserDashboard() {
 
         {/* ══ PROFILE ═════════════════════════════════════════ */}
         {activeTab === "profile" && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-5">My Profile</h2>
+          <div className="rounded-xl p-6" style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+            <h2 className="text-lg font-bold mb-5" style={{ color: "#f0f0f0" }}>My Profile</h2>
             {userData ? (
               <div className="space-y-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                    <User className="w-7 h-7 text-red-500" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: "rgba(192,32,42,0.15)" }}>
+                    <User className="w-7 h-7" style={{ color: "#C0202A" }} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900">{userData.name || "User"}</h3>
-                    <p className="text-sm text-gray-500">{userData.email}</p>
+                    <h3 className="font-bold" style={{ color: "#f0f0f0" }}>{userData.name || "User"}</h3>
+                    <p className="text-sm" style={{ color: "#777" }}>{userData.email}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4" style={{ borderTop: "1px solid #2a2a2a" }}>
                   {[
                     ["Name", userData.name],
                     ["Email", userData.email],
@@ -411,22 +480,24 @@ export default function UserDashboard() {
                     ["Location", userData.location || "Not provided"],
                   ].map(([lbl, val]) => (
                     <div key={lbl}>
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{lbl}</p>
-                      <p className="text-sm text-gray-900">{val || "—"}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "#555" }}>{lbl}</p>
+                      <p className="text-sm" style={{ color: "#e0e0e0" }}>{val || "—"}</p>
                     </div>
                   ))}
                 </div>
-                <button
+                <Btn
                   onClick={() => router.push("/userdashboard/profile/edit")}
-                  className="px-5 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
+                  className="px-5 py-2 text-white rounded-lg text-sm font-semibold"
+                  style={{ background: "#C0202A" }}
+                  hoverStyle={{ background: "#a01820" }}
                 >
                   Edit Profile
-                </button>
+                </Btn>
               </div>
             ) : (
               <div className="text-center py-10">
-                <Loader2 className="w-8 h-8 text-red-500 animate-spin mx-auto mb-2" />
-                <p className="text-sm text-gray-400">Loading profile...</p>
+                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" style={{ color: "#C0202A" }} />
+                <p className="text-sm" style={{ color: "#555" }}>Loading profile...</p>
               </div>
             )}
           </div>
@@ -435,93 +506,99 @@ export default function UserDashboard() {
 
       {/* ══ VENDOR DETAIL MODAL ════════════════════════════════ */}
       {selectedVendor && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
-          <div className="bg-white w-full sm:rounded-2xl sm:max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl">
-            <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 pt-6 pb-8 text-white relative">
-              <button
+        <div className="fixed inset-0 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50"
+          style={{ background: "rgba(0,0,0,0.85)" }}>
+          <div className="w-full sm:rounded-2xl sm:max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl"
+            style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+
+            <div className="px-6 pt-6 pb-8 text-white relative" style={{ background: "#111111" }}>
+              <Btn
                 onClick={() => setSelectedVendor(null)}
-                className="absolute top-4 right-4 p-1.5 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+                className="absolute top-4 right-4 p-1.5 rounded-full"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+                hoverStyle={{ background: "rgba(255,255,255,0.18)" }}
               >
                 <X className="w-4 h-4" />
-              </button>
-              <p className="text-red-200 text-xs font-semibold uppercase tracking-wider mb-1">
+              </Btn>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "#C0202A" }}>
                 {gp(selectedVendor, "serviceCategory", "service_category")}
               </p>
-              <h2 className="text-2xl font-bold mb-2">{gp(selectedVendor, "businessName", "business_name")}</h2>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: "#f0f0f0" }}>{gp(selectedVendor, "businessName", "business_name")}</h2>
               <div className="flex items-center gap-2">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < (selectedVendor.average_rating || selectedVendor.averageRating || 4) ? "fill-yellow-300 text-yellow-300" : "text-red-300"}`} />
+                  <Star key={i} className="w-4 h-4"
+                    style={i < (selectedVendor.average_rating || selectedVendor.averageRating || 4)
+                      ? { fill: "#f0b429", color: "#f0b429" }
+                      : { color: "#444" }} />
                 ))}
-                <span className="text-red-200 text-xs">({selectedVendor.review_count || selectedVendor.reviewCount || 0} reviews)</span>
+                <span className="text-xs" style={{ color: "#555" }}>({selectedVendor.review_count || selectedVendor.reviewCount || 0} reviews)</span>
               </div>
             </div>
 
             <div className="px-6 py-6 space-y-5 -mt-2">
               <div className="flex flex-wrap gap-2">
                 {selectedVendor.city && (
-                  <span className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full">
-                    <MapPin className="w-3.5 h-3.5 text-red-500" />
+                  <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full" style={{ background: "#232323", color: "#bbb" }}>
+                    <MapPin className="w-3.5 h-3.5" style={{ color: "#C0202A" }} />
                     {[selectedVendor.city, selectedVendor.state].filter(Boolean).join(", ")}
                   </span>
                 )}
                 {selectedVendor.pricing && (
-                  <span className="flex items-center gap-1.5 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-full font-semibold">
-                    <p>Starting from</p>
-                    <IndianRupee className="w-3.5 h-3.5" />
-                    {selectedVendor.pricing}
+                  <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: "#001a0a", color: "#4caf7d" }}>
+                    Starting from <IndianRupee className="w-3.5 h-3.5" />{selectedVendor.pricing}
                   </span>
                 )}
-                <span className="flex items-center gap-1.5 text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+                <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full" style={{ background: "#001a2e", color: "#4da6ff" }}>
                   <Shield className="w-3.5 h-3.5" /> Verified
                 </span>
                 {(selectedVendor.years_in_business || selectedVendor.yearsInBusiness) && (
-                  <span className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full">
+                  <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full" style={{ background: "#232323", color: "#bbb" }}>
                     ⭐ {selectedVendor.years_in_business || selectedVendor.yearsInBusiness} yrs exp
                   </span>
                 )}
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-gray-900 mb-2">About</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <h3 className="text-sm font-bold mb-2" style={{ color: "#f0f0f0" }}>About</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#999" }}>
                   {gp(selectedVendor, "description", "description") || "No description provided."}
                 </p>
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-gray-900 mb-2">Services Offered</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="text-sm font-bold mb-2" style={{ color: "#f0f0f0" }}>Services Offered</h3>
+                <p className="text-sm" style={{ color: "#999" }}>
                   {gp(selectedVendor, "servicesOffered", "services_offered") || "Contact vendor for details."}
                 </p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h3 className="text-sm font-bold text-gray-900 mb-3">Contact Information</h3>
+              <div className="rounded-xl p-4" style={{ background: "#232323", border: "1px solid #2e2e2e" }}>
+                <h3 className="text-sm font-bold mb-3" style={{ color: "#f0f0f0" }}>Contact Information</h3>
                 <div className="space-y-2">
                   {selectedVendor.email && (
-                    <div className="flex items-center gap-2.5 text-sm text-gray-700">
-                      <Mail className="w-4 h-4 text-red-500 shrink-0" />
+                    <div className="flex items-center gap-2.5 text-sm" style={{ color: "#bbb" }}>
+                      <Mail className="w-4 h-4 shrink-0" style={{ color: "#C0202A" }} />
                       <span className="truncate">{selectedVendor.email}</span>
                     </div>
                   )}
                   {selectedVendor.phone && (
-                    <div className="flex items-center gap-2.5 text-sm text-gray-700">
-                      <Phone className="w-4 h-4 text-red-500 shrink-0" />
+                    <div className="flex items-center gap-2.5 text-sm" style={{ color: "#bbb" }}>
+                      <Phone className="w-4 h-4 shrink-0" style={{ color: "#C0202A" }} />
                       <span>{selectedVendor.phone}</span>
                     </div>
                   )}
                   {selectedVendor.website && (
                     <div className="flex items-center gap-2.5 text-sm">
-                      <span className="text-red-500 shrink-0">🌐</span>
+                      <span className="shrink-0">🌐</span>
                       <a href={selectedVendor.website} target="_blank" rel="noopener noreferrer"
-                        className="text-red-600 hover:underline truncate">
+                        className="hover:underline truncate" style={{ color: "#C0202A" }}>
                         {selectedVendor.website}
                       </a>
                     </div>
                   )}
                   {selectedVendor.availability && (
-                    <div className="flex items-center gap-2.5 text-sm text-gray-700">
-                      <Clock className="w-4 h-4 text-red-500 shrink-0" />
+                    <div className="flex items-center gap-2.5 text-sm" style={{ color: "#bbb" }}>
+                      <Clock className="w-4 h-4 shrink-0" style={{ color: "#C0202A" }} />
                       <span>{selectedVendor.availability}</span>
                     </div>
                   )}
@@ -530,33 +607,37 @@ export default function UserDashboard() {
 
               {selectedVendor.certification && (
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 mb-2">Certifications</h3>
-                  <p className="text-sm text-gray-600">{selectedVendor.certification}</p>
+                  <h3 className="text-sm font-bold mb-2" style={{ color: "#f0f0f0" }}>Certifications</h3>
+                  <p className="text-sm" style={{ color: "#999" }}>{selectedVendor.certification}</p>
                 </div>
               )}
 
-              <div className="flex gap-3 pt-3 border-t border-gray-100">
-                <button
+              <div className="flex gap-3 pt-3" style={{ borderTop: "1px solid #2a2a2a" }}>
+                <Btn
                   onClick={() => toggleFavorite(selectedVendor.id)}
-                  className={`flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
-                    favorites.some((f) => (f.vendorId || f.vendor_id) === selectedVendor.id)
-                      ? "bg-red-50 text-red-600 border border-red-200"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                  style={favorites.some((f) => (f.vendorId || f.vendor_id) === selectedVendor.id)
+                    ? { background: "rgba(192,32,42,0.12)", color: "#e05060", border: "1px solid rgba(192,32,42,0.3)" }
+                    : { background: "#232323", color: "#ccc", border: "1px solid #3a3a3a" }}
+                  hoverStyle={{ opacity: 0.82 }}
                 >
-                  <Heart className={`w-4 h-4 ${favorites.some((f) => (f.vendorId || f.vendor_id) === selectedVendor.id) ? "fill-red-500" : ""}`} />
+                  <Heart className="w-4 h-4"
+                    style={favorites.some((f) => (f.vendorId || f.vendor_id) === selectedVendor.id)
+                      ? { fill: "#C0202A", color: "#C0202A" } : {}} />
                   {favorites.some((f) => (f.vendorId || f.vendor_id) === selectedVendor.id) ? "Saved" : "Save"}
-                </button>
-                <button
+                </Btn>
+                <Btn
                   onClick={() => {
                     localStorage.setItem("selectedVendor", JSON.stringify(selectedVendor));
                     setSelectedVendor(null);
                     router.push("/userdashboard/book");
                   }}
-                  className="flex-[2] py-3 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2 shadow-md shadow-red-200"
+                  className="flex-[2] py-3 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                  style={{ background: "#C0202A" }}
+                  hoverStyle={{ background: "#a01820" }}
                 >
                   <Calendar className="w-4 h-4" /> Book Now
-                </button>
+                </Btn>
               </div>
             </div>
           </div>
@@ -565,25 +646,28 @@ export default function UserDashboard() {
 
       {/* ══ BOOKING DETAIL MODAL ════════════════════════════════ */}
       {selectedBooking && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
-          <div className="bg-white w-full sm:rounded-2xl sm:max-w-lg shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 className="font-bold text-gray-900">Booking Details</h3>
-              <button onClick={() => setSelectedBooking(null)} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
-                <X className="w-4 h-4 text-gray-500" />
-              </button>
+        <div className="fixed inset-0 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50"
+          style={{ background: "rgba(0,0,0,0.85)" }}>
+          <div className="w-full sm:rounded-2xl sm:max-w-lg shadow-2xl overflow-hidden"
+            style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+
+            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid #2a2a2a" }}>
+              <h3 className="font-bold" style={{ color: "#f0f0f0" }}>Booking Details</h3>
+              <Btn onClick={() => setSelectedBooking(null)} className="p-1.5 rounded-full" style={{}} hoverStyle={{ background: "#2a2a2a" }}>
+                <X className="w-4 h-4" style={{ color: "#888" }} />
+              </Btn>
             </div>
 
             <div className="px-6 py-5 space-y-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="font-bold text-gray-900">{selectedBooking.vendor_name || selectedBooking.vendorName}</h4>
-                  <p className="text-sm text-gray-500">{selectedBooking.service_name || selectedBooking.serviceName}</p>
+                  <h4 className="font-bold" style={{ color: "#f0f0f0" }}>{selectedBooking.vendor_name || selectedBooking.vendorName}</h4>
+                  <p className="text-sm" style={{ color: "#777" }}>{selectedBooking.service_name || selectedBooking.serviceName}</p>
                 </div>
                 <StatusBadge status={selectedBooking.status} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl p-4">
+              <div className="grid grid-cols-2 gap-3 rounded-xl p-4" style={{ background: "#232323" }}>
                 {[
                   ["Booking ID", `#${selectedBooking.id}`],
                   ["Date", selectedBooking.date || "—"],
@@ -593,46 +677,50 @@ export default function UserDashboard() {
                   ["Booked On", selectedBooking.created_at ? new Date(selectedBooking.created_at).toLocaleDateString("en-IN") : "—"],
                 ].map(([lbl, val]) => (
                   <div key={lbl}>
-                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{lbl}</p>
-                    <p className="text-sm font-semibold text-gray-900 mt-0.5">{val}</p>
+                    <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "#555" }}>{lbl}</p>
+                    <p className="text-sm font-semibold mt-0.5" style={{ color: "#e0e0e0" }}>{val}</p>
                   </div>
                 ))}
               </div>
 
               {selectedBooking.message && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Your Message</p>
-                  <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3">{selectedBooking.message}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "#555" }}>Your Message</p>
+                  <p className="text-sm rounded-lg p-3" style={{ color: "#bbb", background: "#232323" }}>{selectedBooking.message}</p>
                 </div>
               )}
               {selectedBooking.vendor_response && (
                 <div>
-                  <p className="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-1">Vendor Response</p>
-                  <p className="text-sm text-gray-700 bg-blue-50 rounded-lg p-3">{selectedBooking.vendor_response}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "#4da6ff" }}>Vendor Response</p>
+                  <p className="text-sm rounded-lg p-3" style={{ color: "#bbb", background: "#001a2e" }}>{selectedBooking.vendor_response}</p>
                 </div>
               )}
               {selectedBooking.new_date && (
-                <div className="bg-purple-50 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-purple-600 mb-1">📅 Rescheduled</p>
-                  <p className="text-sm text-purple-800 font-semibold">{selectedBooking.new_date} at {selectedBooking.new_time}</p>
+                <div className="rounded-lg p-3" style={{ background: "#1a0a2e" }}>
+                  <p className="text-xs font-semibold mb-1" style={{ color: "#b388ff" }}>📅 Rescheduled</p>
+                  <p className="text-sm font-semibold" style={{ color: "#d4b5ff" }}>{selectedBooking.new_date} at {selectedBooking.new_time}</p>
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
-              <button
+            <div className="px-6 py-4 flex gap-3" style={{ borderTop: "1px solid #2a2a2a" }}>
+              <Btn
                 onClick={() => setSelectedBooking(null)}
-                className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                style={{ background: "#232323", color: "#ccc" }}
+                hoverStyle={{ background: "#2e2e2e", color: "#fff" }}
               >
                 Close
-              </button>
+              </Btn>
               {(selectedBooking.status === "pending" || selectedBooking.status === "approved" || selectedBooking.status === "confirmed") && (
-                <button
+                <Btn
                   onClick={() => { setSelectedBooking(null); handleCancelOpen(selectedBooking); }}
-                  className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                  style={{ background: "#C0202A" }}
+                  hoverStyle={{ background: "#a01820" }}
                 >
                   <XCircle className="w-4 h-4" /> Cancel Booking
-                </button>
+                </Btn>
               )}
             </div>
           </div>
@@ -641,43 +729,63 @@ export default function UserDashboard() {
 
       {/* ══ CANCEL CONFIRM MODAL ════════════════════════════════ */}
       {cancelModal.open && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
-          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
-            <div className="bg-red-50 px-6 pt-6 pb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
-                <AlertCircle className="w-6 h-6 text-red-600" />
+        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-[60]"
+          style={{ background: "rgba(0,0,0,0.9)" }}>
+          <div className="rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden"
+            style={{ background: "#1a1a1a", border: "1px solid #2e2e2e" }}>
+
+            <div className="px-6 pt-6 pb-4" style={{ background: "#141414" }}>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
+                style={{ background: "rgba(192,32,42,0.15)" }}>
+                <AlertCircle className="w-6 h-6" style={{ color: "#C0202A" }} />
               </div>
-              <h3 className="font-bold text-gray-900">Cancel Booking?</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Cancel booking with <span className="font-semibold">{cancelModal.booking?.vendor_name || cancelModal.booking?.vendorName}</span>?
+              <h3 className="font-bold" style={{ color: "#f0f0f0" }}>Cancel Booking?</h3>
+              <p className="text-sm mt-1" style={{ color: "#888" }}>
+                Cancel booking with{" "}
+                <span className="font-semibold" style={{ color: "#ccc" }}>
+                  {cancelModal.booking?.vendor_name || cancelModal.booking?.vendorName}
+                </span>?
               </p>
             </div>
+
             <div className="px-6 py-4">
-              <label className="block text-xs font-semibold text-gray-700 mb-2">
-                Reason for cancellation <span className="text-red-500">*</span>
+              <label className="block text-xs font-semibold mb-2" style={{ color: "#aaa" }}>
+                Reason for cancellation <span style={{ color: "#C0202A" }}>*</span>
               </label>
               <textarea
                 rows={3}
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="e.g. Plans changed, found another vendor, event postponed..."
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2.5 text-sm rounded-xl resize-none outline-none"
+                style={{
+                  background: "#232323",
+                  color: "#e0e0e0",
+                  border: "1px solid #3a3a3a",
+                  caretColor: "#C0202A",
+                }}
+                onFocus={e => e.currentTarget.style.border = "1px solid #C0202A"}
+                onBlur={e => e.currentTarget.style.border = "1px solid #3a3a3a"}
               />
               <div className="flex gap-2 mt-4">
-                <button
+                <Btn
                   onClick={() => setCancelModal({ open: false, booking: null })}
-                  className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#232323", color: "#ccc" }}
+                  hoverStyle={{ background: "#2e2e2e", color: "#fff" }}
                 >
                   Keep Booking
-                </button>
-                <button
+                </Btn>
+                <Btn
                   onClick={handleCancelConfirm}
                   disabled={actionLoading}
-                  className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 text-white rounded-xl text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+                  style={{ background: "#C0202A" }}
+                  hoverStyle={actionLoading ? {} : { background: "#a01820" }}
                 >
                   {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
                   {actionLoading ? "Cancelling..." : "Confirm Cancel"}
-                </button>
+                </Btn>
               </div>
             </div>
           </div>

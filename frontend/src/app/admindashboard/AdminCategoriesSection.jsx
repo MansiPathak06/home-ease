@@ -41,35 +41,45 @@ function CategoryModal({ category, onClose, onSave }) {
   const ICONS = ["🎉","📸","🎬","🌸","🎵","🏛","🚗","💍","💐","💄","🎧","🍽","🎪","✈","🎨"];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
-        <div className="flex justify-between items-center border-b px-6 py-4">
-          <h3 className="font-bold text-gray-900">{isEdit ? "Edit Category" : "Add New Category"}</h3>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg">
-            <X className="w-5 h-5 text-gray-500" />
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      {/* Modal: dark background matching the login page right panel */}
+      <div className="rounded-xl w-full max-w-md shadow-2xl" style={{ background: "#1C1010", border: "1px solid #3a1a1a" }}>
+        <div className="flex justify-between items-center px-6 py-4" style={{ borderBottom: "1px solid #3a1a1a" }}>
+          <h3 className="font-bold text-white">{isEdit ? "Edit Category" : "Add New Category"}</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg transition-colors" style={{ background: "transparent" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#2a1a1a"}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            <X className="w-5 h-5" style={{ color: "#aaa" }} />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           {/* Name */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Category Name *</label>
+            <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#ccc" }}>Category Name *</label>
             <input type="text" value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
               placeholder="e.g. Photography, Catering..."
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500" />
+              className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+              style={{
+                background: "#EEF2F7", color: "#1a1a1a", border: "1px solid #3a1a1a",
+              }}
+              onFocus={e => e.target.style.border = "1px solid #C0392B"}
+              onBlur={e => e.target.style.border = "1px solid #3a1a1a"} />
           </div>
 
           {/* Icon picker */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Icon (emoji)</label>
+            <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#ccc" }}>Icon (emoji)</label>
             <div className="flex gap-1.5 flex-wrap mb-2">
               {ICONS.map(ic => (
                 <button key={ic} type="button"
                   onClick={() => setForm({ ...form, icon: ic })}
-                  className={`w-8 h-8 text-lg rounded-lg border-2 transition-all ${
-                    form.icon === ic ? "border-red-500 bg-red-50" : "border-gray-200 hover:border-gray-300"
-                  }`}>
+                  className="w-8 h-8 text-lg rounded-lg border-2 transition-all"
+                  style={{
+                    borderColor: form.icon === ic ? "#C0392B" : "#3a1a1a",
+                    background:  form.icon === ic ? "#2a0a0a" : "transparent",
+                  }}>
                   {ic}
                 </button>
               ))}
@@ -77,52 +87,67 @@ function CategoryModal({ category, onClose, onSave }) {
             <input type="text" value={form.icon}
               onChange={e => setForm({ ...form, icon: e.target.value })}
               placeholder="Or type any emoji"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500" />
+              className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+              style={{ background: "#EEF2F7", color: "#1a1a1a", border: "1px solid #3a1a1a" }}
+              onFocus={e => e.target.style.border = "1px solid #C0392B"}
+              onBlur={e => e.target.style.border = "1px solid #3a1a1a"} />
           </div>
 
           {/* Description */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Description</label>
+            <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#ccc" }}>Description</label>
             <textarea rows={2} value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
               placeholder="Brief description of this service category..."
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 resize-none" />
+              className="w-full px-3 py-2 text-sm rounded-lg resize-none outline-none"
+              style={{ background: "#EEF2F7", color: "#1a1a1a", border: "1px solid #3a1a1a" }}
+              onFocus={e => e.target.style.border = "1px solid #C0392B"}
+              onBlur={e => e.target.style.border = "1px solid #3a1a1a"} />
           </div>
 
           {/* Price + Commission */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Base Price (₹)</label>
+              <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#ccc" }}>Base Price (₹)</label>
               <input type="number" value={form.base_price}
                 onChange={e => setForm({ ...form, base_price: e.target.value })}
                 placeholder="e.g. 5000"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500" />
+                className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                style={{ background: "#EEF2F7", color: "#1a1a1a", border: "1px solid #3a1a1a" }}
+                onFocus={e => e.target.style.border = "1px solid #C0392B"}
+                onBlur={e => e.target.style.border = "1px solid #3a1a1a"} />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Default Commission (%)</label>
+              <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#ccc" }}>Default Commission (%)</label>
               <input type="number" value={form.commission_pct} min="0" max="100"
                 onChange={e => setForm({ ...form, commission_pct: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500" />
+                className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                style={{ background: "#EEF2F7", color: "#1a1a1a", border: "1px solid #3a1a1a" }}
+                onFocus={e => e.target.style.border = "1px solid #C0392B"}
+                onBlur={e => e.target.style.border = "1px solid #3a1a1a"} />
             </div>
           </div>
 
           {/* Active toggle */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center justify-between rounded-lg p-3" style={{ background: "#2a1212" }}>
             <div>
-              <p className="text-xs font-semibold text-gray-700">Active Status</p>
-              <p className="text-xs text-gray-400">Inactive categories won't appear for vendors</p>
+              <p className="text-xs font-semibold text-white">Active Status</p>
+              <p className="text-xs" style={{ color: "#888" }}>Inactive categories won't appear for vendors</p>
             </div>
             <button type="button" onClick={() => setForm({ ...form, is_active: !form.is_active })}>
               {form.is_active
-                ? <ToggleRight className="w-8 h-8 text-green-500" />
-                : <ToggleLeft  className="w-8 h-8 text-gray-400" />}
+                ? <ToggleRight className="w-8 h-8" style={{ color: "#22c55e" }} />
+                : <ToggleLeft  className="w-8 h-8" style={{ color: "#666" }} />}
             </button>
           </div>
 
-          {err && <p className="text-xs text-red-600 font-semibold">{err}</p>}
+          {err && <p className="text-xs font-semibold" style={{ color: "#f87171" }}>{err}</p>}
 
           <button onClick={handleSave} disabled={saving}
-            className="w-full py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 disabled:opacity-50">
+            className="w-full py-2.5 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
+            style={{ background: "#C0392B" }}
+            onMouseEnter={e => !saving && (e.currentTarget.style.background = "#a93226")}
+            onMouseLeave={e => e.currentTarget.style.background = "#C0392B"}>
             {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Category"}
           </button>
         </div>
@@ -135,7 +160,7 @@ function CategoryModal({ category, onClose, onSave }) {
 export default function AdminCategoriesSection() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
-  const [modalTarget, setModalTarget] = useState(null); // null=closed, {}=new, {id,...}=edit
+  const [modalTarget, setModalTarget] = useState(null);
   const [search, setSearch]         = useState("");
   const [toast, setToast]           = useState({ text: "", type: "" });
 
@@ -180,63 +205,85 @@ export default function AdminCategoriesSection() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white border-l-4 border-blue-500 rounded-lg shadow-sm p-3 flex items-center justify-between">
+        {/* Total */}
+        <div className="rounded-lg shadow-sm p-3 flex items-center justify-between"
+          style={{ background: "#1C1010", borderLeft: "4px solid #C0392B" }}>
           <div>
-            <p className="text-xs text-gray-500 font-medium">Total Categories</p>
-            <p className="text-lg font-bold text-gray-900 mt-0.5">{categories.length}</p>
+            <p className="text-xs font-medium" style={{ color: "#aaa" }}>Total Categories</p>
+            <p className="text-lg font-bold text-white mt-0.5">{categories.length}</p>
           </div>
-          <Tag className="w-5 h-5 text-gray-300" />
+          <Tag className="w-5 h-5" style={{ color: "#C0392B" }} />
         </div>
-        <div className="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-3 flex items-center justify-between">
+        {/* Active */}
+        <div className="rounded-lg shadow-sm p-3 flex items-center justify-between"
+          style={{ background: "#1C1010", borderLeft: "4px solid #22c55e" }}>
           <div>
-            <p className="text-xs text-gray-500 font-medium">Active</p>
-            <p className="text-lg font-bold text-gray-900 mt-0.5">{active}</p>
+            <p className="text-xs font-medium" style={{ color: "#aaa" }}>Active</p>
+            <p className="text-lg font-bold text-white mt-0.5">{active}</p>
           </div>
-          <CheckCircle className="w-5 h-5 text-gray-300" />
+          <CheckCircle className="w-5 h-5" style={{ color: "#22c55e" }} />
         </div>
-        <div className="bg-white border-l-4 border-gray-400 rounded-lg shadow-sm p-3 flex items-center justify-between">
+        {/* Inactive */}
+        <div className="rounded-lg shadow-sm p-3 flex items-center justify-between"
+          style={{ background: "#1C1010", borderLeft: "4px solid #555" }}>
           <div>
-            <p className="text-xs text-gray-500 font-medium">Inactive</p>
-            <p className="text-lg font-bold text-gray-900 mt-0.5">{inactive}</p>
+            <p className="text-xs font-medium" style={{ color: "#aaa" }}>Inactive</p>
+            <p className="text-lg font-bold text-white mt-0.5">{inactive}</p>
           </div>
-          <ToggleLeft className="w-5 h-5 text-gray-300" />
+          <ToggleLeft className="w-5 h-5" style={{ color: "#555" }} />
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 flex gap-3">
+      <div className="rounded-lg p-4 flex gap-3" style={{ background: "#1C1010", border: "1px solid #3a1a1a" }}>
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#888" }} />
           <input type="text" placeholder="Search categories..."
             value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500" />
+            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg outline-none text-white"
+            style={{ background: "#2a1212", border: "1px solid #3a1a1a" }}
+            onFocus={e => e.target.style.border = "1px solid #C0392B"}
+            onBlur={e => e.target.style.border = "1px solid #3a1a1a"} />
         </div>
         <button onClick={loadCategories}
-          className="p-2 hover:bg-gray-100 rounded-lg border border-gray-300" title="Refresh">
-          <RefreshCw className="w-4 h-4 text-gray-500" />
+          className="p-2 rounded-lg border transition-colors"
+          style={{ border: "1px solid #3a1a1a", background: "transparent" }}
+          title="Refresh"
+          onMouseEnter={e => e.currentTarget.style.background = "#2a1212"}
+          onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+          <RefreshCw className="w-4 h-4" style={{ color: "#aaa" }} />
         </button>
         <button onClick={() => setModalTarget({})}
-          className="flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700">
+          className="flex items-center gap-1.5 px-4 py-2 text-white rounded-lg text-sm font-semibold transition-colors"
+          style={{ background: "#C0392B" }}
+          onMouseEnter={e => e.currentTarget.style.background = "#a93226"}
+          onMouseLeave={e => e.currentTarget.style.background = "#C0392B"}>
           <Plus className="w-4 h-4" /> Add Category
         </button>
       </div>
 
       {/* Toast */}
       {toast.text && (
-        <div className={`px-4 py-2.5 rounded-lg text-sm font-semibold text-center ${
-          toast.type === "error" ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"
-        }`}>{toast.text}</div>
+        <div className="px-4 py-2.5 rounded-lg text-sm font-semibold text-center"
+          style={toast.type === "error"
+            ? { background: "#2a0a0a", color: "#f87171", border: "1px solid #7f1d1d" }
+            : { background: "#0a2a0a", color: "#4ade80", border: "1px solid #14532d" }}>
+          {toast.text}
+        </div>
       )}
 
       {/* Category Cards */}
       {loading ? (
-        <div className="py-20 text-center text-gray-400 text-sm">Loading categories...</div>
+        <div className="py-20 text-center text-sm" style={{ color: "#888" }}>Loading categories...</div>
       ) : visible.length === 0 ? (
-        <div className="py-20 text-center bg-white rounded-lg border border-gray-200">
-          <Tag className="w-10 h-10 text-gray-200 mx-auto mb-2" />
-          <p className="text-gray-400 text-sm mb-3">No categories yet</p>
+        <div className="py-20 text-center rounded-lg" style={{ background: "#1C1010", border: "1px solid #3a1a1a" }}>
+          <Tag className="w-10 h-10 mx-auto mb-2" style={{ color: "#3a1a1a" }} />
+          <p className="text-sm mb-3" style={{ color: "#888" }}>No categories yet</p>
           <button onClick={() => setModalTarget({})}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700">
+            className="px-4 py-2 text-white rounded-lg text-sm font-semibold transition-colors"
+            style={{ background: "#C0392B" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#a93226"}
+            onMouseLeave={e => e.currentTarget.style.background = "#C0392B"}>
             Add First Category
           </button>
         </div>
@@ -244,21 +291,28 @@ export default function AdminCategoriesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {visible.map(cat => (
             <div key={cat.id}
-              className={`bg-white rounded-lg border-2 p-4 transition-all hover:shadow-md ${
-                cat.is_active ? "border-gray-200" : "border-dashed border-gray-200 opacity-60"
-              }`}>
+              className="rounded-lg p-4 transition-all"
+              style={{
+                background: "#1C1010",
+                border: cat.is_active ? "2px solid #3a1a1a" : "2px dashed #2a1a1a",
+                opacity: cat.is_active ? 1 : 0.6,
+              }}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 20px rgba(192,57,43,0.15)"}
+              onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}>
 
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                    style={{ background: "#2a0a0a" }}>
                     {cat.icon || "📦"}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-gray-900">{cat.name}</h3>
-                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
-                      cat.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                    }`}>
+                    <h3 className="text-sm font-bold text-white">{cat.name}</h3>
+                    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                      style={cat.is_active
+                        ? { background: "#0a2a0a", color: "#4ade80" }
+                        : { background: "#2a2a2a", color: "#888" }}>
                       {cat.is_active ? "Active" : "Inactive"}
                     </span>
                   </div>
@@ -267,26 +321,26 @@ export default function AdminCategoriesSection() {
 
               {/* Description */}
               {cat.description && (
-                <p className="text-xs text-gray-500 mb-3 line-clamp-2">{cat.description}</p>
+                <p className="text-xs mb-3 line-clamp-2" style={{ color: "#aaa" }}>{cat.description}</p>
               )}
 
               {/* Price + Commission */}
               <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-gray-50 rounded-md p-2">
-                  <p className="text-xs text-gray-400">Base Price</p>
-                  <p className="text-xs font-bold text-gray-800">
+                <div className="rounded-md p-2" style={{ background: "#2a1212" }}>
+                  <p className="text-xs" style={{ color: "#888" }}>Base Price</p>
+                  <p className="text-xs font-bold text-white">
                     {cat.base_price ? fmt(cat.base_price) : "Not set"}
                   </p>
                 </div>
-                <div className="bg-gray-50 rounded-md p-2">
-                  <p className="text-xs text-gray-400">Commission</p>
-                  <p className="text-xs font-bold text-gray-800">{cat.commission_pct ?? 15}%</p>
+                <div className="rounded-md p-2" style={{ background: "#2a1212" }}>
+                  <p className="text-xs" style={{ color: "#888" }}>Commission</p>
+                  <p className="text-xs font-bold text-white">{cat.commission_pct ?? 15}%</p>
                 </div>
               </div>
 
               {/* Vendor count if available */}
               {cat.vendor_count !== undefined && (
-                <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-3">
+                <div className="flex items-center gap-1.5 text-xs mb-3" style={{ color: "#888" }}>
                   <Briefcase className="w-3 h-3" />
                   {cat.vendor_count} vendor{cat.vendor_count !== 1 ? "s" : ""} in this category
                 </div>
@@ -295,21 +349,28 @@ export default function AdminCategoriesSection() {
               {/* Actions */}
               <div className="flex gap-2">
                 <button onClick={() => setModalTarget(cat)}
-                  className="flex-1 py-1.5 bg-red-600 text-white rounded-md text-xs font-semibold hover:bg-red-700 flex items-center justify-center gap-1">
+                  className="flex-1 py-1.5 text-white rounded-md text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+                  style={{ background: "#C0392B" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#a93226"}
+                  onMouseLeave={e => e.currentTarget.style.background = "#C0392B"}>
                   <Edit2 className="w-3 h-3" /> Edit
                 </button>
                 <button onClick={() => handleToggle(cat)}
-                  className={`flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1 ${
-                    cat.is_active
-                      ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      : "bg-green-100 text-green-700 hover:bg-green-200"
-                  }`}>
+                  className="flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+                  style={cat.is_active
+                    ? { background: "#2a1212", color: "#aaa" }
+                    : { background: "#0a2a0a", color: "#4ade80" }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
+                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
                   {cat.is_active
                     ? <><ToggleLeft className="w-3 h-3" /> Deactivate</>
                     : <><ToggleRight className="w-3 h-3" /> Activate</>}
                 </button>
                 <button onClick={() => handleDelete(cat.id, cat.name)}
-                  className="py-1.5 px-2.5 bg-gray-100 text-gray-500 rounded-md text-xs hover:bg-red-50 hover:text-red-600 transition-colors">
+                  className="py-1.5 px-2.5 rounded-md text-xs transition-colors"
+                  style={{ background: "#2a1212", color: "#888" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#3a0a0a"; e.currentTarget.style.color = "#f87171"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#2a1212"; e.currentTarget.style.color = "#888"; }}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>

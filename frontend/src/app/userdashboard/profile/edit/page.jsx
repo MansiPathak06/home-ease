@@ -45,7 +45,6 @@ export default function EditProfile() {
     setSaving(true);
 
     try {
-      // Update profile via API (add this endpoint to backend)
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/user/profile`, {
         method: 'PUT',
         headers: {
@@ -56,7 +55,7 @@ export default function EditProfile() {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         alert("Profile updated successfully!");
         router.push('/userdashboard');
@@ -80,143 +79,143 @@ export default function EditProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-orange-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#1A1A1A] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-red-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading profile...</p>
+          <Loader2 className="w-10 h-10 text-red-600 animate-spin mx-auto mb-3" />
+          <p className="text-gray-300 text-sm">Loading profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-orange-50">
-      <div className="max-w-2xl mx-auto px-4 py-12">
+    <div className="min-h-screen bg-[#1A1A1A] pt-24 pb-16 px-4">
+      {/* 🔥 pt-24 = TOP SPACING FIX */}
+
+      <div className="max-w-md mx-auto">
+
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => router.back()}
-            className="p-2 bg-white rounded-xl shadow-md hover:shadow-lg transition-all"
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-[#2C2C2C] border border-[#3a3a3a] hover:border-red-500 transition"
           >
-            <ArrowLeft className="w-6 h-6 text-gray-700" />
+            <ArrowLeft size={16} className="text-gray-300" />
           </button>
+
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-              Edit Profile
-            </h1>
-            <p className="text-gray-600 mt-1">Update your personal information</p>
+            <h1 className="text-xl font-semibold text-white">Edit Profile</h1>
+            <p className="text-xs text-gray-400">Update your personal info</p>
           </div>
         </div>
 
-        {/* Edit Form */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
+        {/* Card */}
+        <div className="bg-gradient-to-br from-[#2a2a2a] to-[#1f1f1f] border border-[#2f2f2f] rounded-xl p-6 shadow-lg">
+
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-6">
+            <div className="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/30 p-3 rounded-lg">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+
             {/* Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[11px] font-semibold text-gray-400 mb-1 uppercase">
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <input
                   name="name"
-                  type="text"
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                  placeholder="Enter your full name"
+                  className="w-full pl-10 pr-3 py-2.5 bg-[#1F1F1F] border border-[#3a3a3a] rounded-lg text-sm text-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email Address
+              <label className="block text-[11px] font-semibold text-gray-400 mb-1 uppercase">
+                Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <input
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                  placeholder="your@email.com"
+                  className="w-full pl-10 pr-3 py-2.5 bg-[#1F1F1F] border border-[#3a3a3a] rounded-lg text-sm text-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none"
                 />
               </div>
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Phone Number
+              <label className="block text-[11px] font-semibold text-gray-400 mb-1 uppercase">
+                Phone
               </label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <input
                   name="phone"
-                  type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                  placeholder="+91 98765 43210"
+                  className="w-full pl-10 pr-3 py-2.5 bg-[#1F1F1F] border border-[#3a3a3a] rounded-lg text-sm text-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none"
                 />
               </div>
             </div>
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[11px] font-semibold text-gray-400 mb-1 uppercase">
                 Location
               </label>
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
                 <input
                   name="location"
-                  type="text"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                  placeholder="City, State"
+                  className="w-full pl-10 pr-3 py-2.5 bg-[#1F1F1F] border border-[#3a3a3a] rounded-lg text-sm text-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none"
                 />
               </div>
             </div>
 
-            <div className="flex gap-4 pt-4">
+            {/* Buttons */}
+            <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => router.push('/userdashboard')}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                className="flex-1 py-2.5 text-sm rounded-lg bg-[#252525] border border-[#3a3a3a] text-gray-300 hover:bg-[#2f2f2f] transition"
               >
                 Cancel
               </button>
+
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 text-sm rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white flex items-center justify-center gap-2 hover:opacity-90 transition disabled:opacity-60"
               >
                 {saving ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Saving...
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Saving
                   </>
                 ) : (
                   <>
-                    <Save className="w-5 h-5" />
-                    Save Changes
+                    <Save size={14} />
+                    Save
                   </>
                 )}
               </button>
             </div>
+
           </form>
         </div>
       </div>

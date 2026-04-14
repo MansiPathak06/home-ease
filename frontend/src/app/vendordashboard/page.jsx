@@ -28,8 +28,69 @@ import {
   ChevronUp,
   AlertCircle,
   Check,
-  Navigation, 
+  Navigation,
 } from "lucide-react";
+
+// ── THEME TOKENS (HomeEase full dark palette) ───────────────
+const T = {
+  crimson:       "#C0392B",
+  crimsonHover:  "#A41B24",
+  crimsonLight:  "#3D1210",   // dark red tint for badges/alerts on dark bg
+  crimsonMuted:  "#5A1A18",   // border tint on dark bg
+  crimsonText:   "#F1948A",   // readable red text on dark bg
+
+  dark:          "#1C1C1C",   // main page background
+  darkSurface:   "#242424",   // cards / panels
+  darkSurface2:  "#2C2C2C",   // slightly lighter surface (nested cards)
+  darkBorder:    "#3A3A3A",   // borders on dark bg
+  darkBorder2:   "#333333",   // subtler border
+
+  inputBg:       "#2A2A2A",   // dark input fields
+  inputBorder:   "#444444",
+
+  white:         "#FFFFFF",
+  offWhite:      "#F0F0F0",   // text on dark bg
+  gray50:        "#2A2A2A",   // "light" bg replacement → dark surface
+  gray100:       "#333333",
+  gray200:       "#444444",
+  gray400:       "#888888",
+  gray500:       "#777777",
+  gray600:       "#AAAAAA",
+  gray700:       "#CCCCCC",
+  gray900:       "#EEEEEE",   // near-white text
+};
+
+// ── INLINE STYLE HELPERS ────────────────────────────────────
+const btn = {
+  primary: {
+    backgroundColor: T.crimson,
+    color: T.white,
+    border: "none",
+    borderRadius: 6,
+    padding: "7px 14px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    transition: "background 0.15s",
+  },
+  outline: {
+    backgroundColor: "transparent",
+    color: T.gray700,
+    border: `1px solid ${T.darkBorder}`,
+    borderRadius: 6,
+    padding: "7px 14px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    transition: "background 0.15s",
+  },
+};
 
 export default function VendorDashboard() {
   const router = useRouter();
@@ -217,80 +278,102 @@ export default function VendorDashboard() {
   const handleLogoutConfirm = () => { localStorage.clear(); router.push("/vendorlogin"); };
   const handleLogoutClick   = () => setShowLogoutModal(true);
 
-  // ── STATUS HELPERS ─────────────────────────────────────────
-
+  // ── STATUS CONFIG ──────────────────────────────────────────
   const statusConfig = {
-    pending:     { bg: "bg-yellow-100", text: "text-yellow-700", dot: "bg-yellow-500", label: "Pending"     },
-    approved:    { bg: "bg-blue-100",   text: "text-blue-700",   dot: "bg-blue-500",   label: "Approved"    },
-    completed:   { bg: "bg-green-100",  text: "text-green-700",  dot: "bg-green-500",  label: "Completed"   },
-    rejected:    { bg: "bg-red-100",    text: "text-red-700",    dot: "bg-red-500",    label: "Rejected"    },
-    cancelled:   { bg: "bg-gray-100",   text: "text-gray-600",   dot: "bg-gray-400",   label: "Cancelled"   },
-    rescheduled: { bg: "bg-purple-100", text: "text-purple-700", dot: "bg-purple-500", label: "Rescheduled" },
+    pending:     { bg: "#3A2E00", text: "#FCD34D", dot: "#F59E0B", label: "Pending"     },
+    approved:    { bg: "#0D2340", text: "#93C5FD", dot: "#3B82F6", label: "Approved"    },
+    completed:   { bg: "#052E16", text: "#6EE7B7", dot: "#10B981", label: "Completed"   },
+    rejected:    { bg: T.crimsonLight, text: T.crimsonText, dot: T.crimson, label: "Rejected"    },
+    cancelled:   { bg: "#2A2A2A", text: "#9CA3AF", dot: "#6B7280", label: "Cancelled"   },
+    rescheduled: { bg: "#1E1040", text: "#C4B5FD", dot: "#7C3AED", label: "Rescheduled" },
   };
 
   const getStatusBadge = (status) => {
-    const cfg = statusConfig[status] || { bg: "bg-gray-100", text: "text-gray-700", dot: "bg-gray-400", label: status };
+    const cfg = statusConfig[status] || { bg: "#2A2A2A", text: "#9CA3AF", dot: "#6B7280", label: status };
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
-        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+      <span style={{
+        display: "inline-flex", alignItems: "center", gap: 5,
+        padding: "2px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+        backgroundColor: cfg.bg, color: cfg.text,
+      }}>
+        <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: cfg.dot, display: "inline-block" }} />
         {cfg.label}
       </span>
     );
   };
 
-  // ── FORMAT CURRENCY ────────────────────────────────────────
   const formatINR = (amount) =>
     `₹${Number(amount || 0).toLocaleString("en-IN")}`;
+
+  // ── INPUT STYLE (dark, matching page) ─────────────────────
+  const inputStyle = {
+    width: "100%",
+    padding: "8px 12px",
+    fontSize: 13,
+    border: `1px solid ${T.inputBorder}`,
+    borderRadius: 6,
+    backgroundColor: T.inputBg,
+    color: T.gray900,
+    outline: "none",
+    boxSizing: "border-box",
+  };
+
+  const textareaStyle = { ...inputStyle, resize: "none" };
 
   // ── BOOKING ACTIONS COMPONENT ──────────────────────────────
 
   const BookingActions = ({ booking, compact = false }) => {
     const s = booking.status;
-    const btnBase = compact
-      ? "px-2.5 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 disabled:opacity-50"
-      : "px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 disabled:opacity-50";
+    const base = {
+      padding: compact ? "4px 10px" : "6px 12px",
+      borderRadius: 6,
+      fontSize: 11,
+      fontWeight: 700,
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      border: "none",
+      transition: "opacity 0.15s",
+    };
 
     return (
-      <div className={`flex flex-wrap gap-1.5 ${compact ? "" : "mt-3 pt-3 border-t border-gray-100"}`}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, ...(compact ? {} : { marginTop: 12, paddingTop: 12, borderTop: `1px solid ${T.darkBorder}` }) }}>
         {s === "pending" && (
           <button disabled={actionLoading} onClick={() => handleApprove(booking)}
-            className={`${btnBase} bg-green-600 text-white hover:bg-green-700`}>
-            <CheckCircle className="w-3.5 h-3.5" /> Accept
+            style={{ ...base, backgroundColor: "#059669", color: T.white }}>
+            <CheckCircle style={{ width: 12, height: 12 }} /> Accept
           </button>
         )}
         {(s === "pending" || s === "approved") && (
           <button disabled={actionLoading} onClick={() => handleRejectOpen(booking)}
-            className={`${btnBase} bg-red-600 text-white hover:bg-red-700`}>
-            <XCircle className="w-3.5 h-3.5" /> Reject
+            style={{ ...base, backgroundColor: T.crimson, color: T.white }}>
+            <XCircle style={{ width: 12, height: 12 }} /> Reject
           </button>
         )}
         {(s === "pending" || s === "approved") && (
           <button disabled={actionLoading} onClick={() => handleRescheduleOpen(booking)}
-            className={`${btnBase} bg-blue-600 text-white hover:bg-blue-700`}>
-            <RefreshCw className="w-3.5 h-3.5" /> Reschedule
+            style={{ ...base, backgroundColor: "#2563EB", color: T.white }}>
+            <RefreshCw style={{ width: 12, height: 12 }} /> Reschedule
           </button>
         )}
         {s === "approved" && (
           <button disabled={actionLoading} onClick={() => handleMarkCompleted(booking)}
-            className={`${btnBase} bg-purple-600 text-white hover:bg-purple-700`}>
-            <Check className="w-3.5 h-3.5" /> Mark Complete
+            style={{ ...base, backgroundColor: "#7C3AED", color: T.white }}>
+            <Check style={{ width: 12, height: 12 }} /> Mark Complete
           </button>
         )}
-       {/* Track button — show when booking is approved/active */}
-{(s === "approved" || s === "en_route" || s === "arrived" || s === "in_service") && (
-  <button
-    onClick={() => router.push(`/vendordashboard/track/${booking.id}`)}
-    className={`${btnBase} bg-indigo-600 text-white hover:bg-indigo-700`}
-  >
-    <Navigation className="w-3.5 h-3.5" /> Track
-  </button>
-)}
-
-<button disabled={actionLoading} onClick={() => handleNotesOpen(booking)}
-  className={`${btnBase} border border-gray-300 text-gray-700 hover:bg-gray-50`}>
-  <FileText className="w-3.5 h-3.5" />
-  {booking.service_notes ? "Edit Notes" : "Add Notes"}
-</button>
+        {(s === "approved" || s === "en_route" || s === "arrived" || s === "in_service") && (
+          <button onClick={() => router.push(`/vendordashboard/track/${booking.id}`)}
+            style={{ ...base, backgroundColor: "#4F46E5", color: T.white }}>
+            <Navigation style={{ width: 12, height: 12 }} /> Track
+          </button>
+        )}
+        <button disabled={actionLoading} onClick={() => handleNotesOpen(booking)}
+          style={{ ...base, backgroundColor: "transparent", color: T.gray600, border: `1px solid ${T.darkBorder}` }}>
+          <FileText style={{ width: 12, height: 12 }} />
+          {booking.service_notes ? "Edit Notes" : "Add Notes"}
+        </button>
       </div>
     );
   };
@@ -300,93 +383,96 @@ export default function VendorDashboard() {
   const BookingRow = ({ booking, showActions = true }) => {
     const isOpen = expandedBooking === booking.id;
     return (
-      <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-sm transition-all">
+      <div style={{
+        border: `1px solid ${T.darkBorder}`,
+        borderRadius: 8,
+        overflow: "hidden",
+        transition: "box-shadow 0.15s",
+      }}>
         <div
-          className="p-4 flex flex-col md:flex-row justify-between gap-3 cursor-pointer select-none"
+          style={{ padding: 16, display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12, cursor: "pointer", userSelect: "none", backgroundColor: T.darkSurface2 }}
           onClick={() => setExpandedBooking(isOpen ? null : booking.id)}
         >
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm font-bold text-gray-900">{booking.service_name}</h3>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: T.gray900 }}>{booking.service_name}</span>
               {getStatusBadge(booking.status)}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-600">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, fontSize: 12, color: T.gray600 }}>
               <span>👤 {booking.customer_name}</span>
               <span>📅 {booking.date}</span>
               <span>🕐 {booking.time}</span>
-              {/* ── ₹ instead of $ ── */}
-              <span className="font-semibold text-gray-900 flex items-center gap-0.5">
-                <IndianRupee className="w-3 h-3" />
+              <span style={{ fontWeight: 700, color: T.gray900, display: "flex", alignItems: "center", gap: 2 }}>
+                <IndianRupee style={{ width: 12, height: 12 }} />
                 {Number(booking.amount || 0).toLocaleString("en-IN")}
               </span>
             </div>
             {booking.service_notes && (
-              <p className="mt-1.5 text-xs text-blue-600 flex items-center gap-1">
-                <FileText className="w-3 h-3" /> Has service notes
+              <p style={{ marginTop: 6, fontSize: 11, color: "#93C5FD", display: "flex", alignItems: "center", gap: 4 }}>
+                <FileText style={{ width: 12, height: 12 }} /> Has service notes
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 md:flex-col md:items-end">
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {showActions && <BookingActions booking={booking} compact />}
-            {isOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+            {isOpen
+              ? <ChevronUp style={{ width: 16, height: 16, color: T.gray400 }} />
+              : <ChevronDown style={{ width: 16, height: 16, color: T.gray400 }} />}
           </div>
         </div>
 
         {isOpen && (
-          <div className="border-t border-gray-100 bg-gray-50 px-4 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-3">
+          <div style={{ borderTop: `1px solid ${T.darkBorder}`, backgroundColor: T.darkSurface, padding: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontSize: 12, marginBottom: 12 }}>
+              {[
+                ["Customer Email", booking.customer_email || "—"],
+                ["Customer Phone", booking.customer_phone || "—"],
+                ["Booking ID", `#${booking.id}`],
+              ].map(([label, val]) => (
+                <div key={label}>
+                  <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>{label}</p>
+                  <p style={{ color: T.gray900 }}>{val}</p>
+                </div>
+              ))}
               <div>
-                <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Customer Email</p>
-                <p className="text-gray-900">{booking.customer_email || "—"}</p>
-              </div>
-              <div>
-                <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Customer Phone</p>
-                <p className="text-gray-900">{booking.customer_phone || "—"}</p>
-              </div>
-              <div>
-                <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Booking ID</p>
-                <p className="text-gray-900 font-mono">#{booking.id}</p>
-              </div>
-              <div>
-                <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Amount</p>
-                {/* ── ₹ instead of $ ── */}
-                <p className="text-gray-900 font-semibold flex items-center gap-0.5">
-                  <IndianRupee className="w-3.5 h-3.5" />
+                <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Amount</p>
+                <p style={{ color: T.gray900, fontWeight: 700, display: "flex", alignItems: "center", gap: 2 }}>
+                  <IndianRupee style={{ width: 13, height: 13 }} />
                   {Number(booking.amount || 0).toLocaleString("en-IN")}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Created</p>
-                <p className="text-gray-900">{booking.created_at ? new Date(booking.created_at).toLocaleDateString("en-IN") : "—"}</p>
+                <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Created</p>
+                <p style={{ color: T.gray900 }}>{booking.created_at ? new Date(booking.created_at).toLocaleDateString("en-IN") : "—"}</p>
               </div>
               {booking.guests && (
                 <div>
-                  <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Guests</p>
-                  <p className="text-gray-900">{booking.guests}</p>
+                  <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Guests</p>
+                  <p style={{ color: T.gray900 }}>{booking.guests}</p>
                 </div>
               )}
               {booking.new_date && (
-                <div className="col-span-2">
-                  <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Rescheduled To</p>
-                  <p className="text-purple-700 font-semibold">{booking.new_date} at {booking.new_time}</p>
+                <div style={{ gridColumn: "span 2" }}>
+                  <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Rescheduled To</p>
+                  <p style={{ color: "#C4B5FD", fontWeight: 700 }}>{booking.new_date} at {booking.new_time}</p>
                 </div>
               )}
               {booking.vendor_response && (
-                <div className="col-span-2">
-                  <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Your Response</p>
-                  <p className="text-gray-900 bg-white border border-gray-200 rounded p-2">{booking.vendor_response}</p>
+                <div style={{ gridColumn: "span 2" }}>
+                  <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Your Response</p>
+                  <p style={{ color: T.gray900, backgroundColor: T.darkSurface2, border: `1px solid ${T.darkBorder}`, borderRadius: 6, padding: "6px 10px" }}>{booking.vendor_response}</p>
                 </div>
               )}
               {booking.message && (
-                <div className="col-span-2">
-                  <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Customer Message</p>
-                  <p className="text-gray-900 bg-white border border-gray-200 rounded p-2">{booking.message}</p>
+                <div style={{ gridColumn: "span 2" }}>
+                  <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Customer Message</p>
+                  <p style={{ color: T.gray900, backgroundColor: T.darkSurface2, border: `1px solid ${T.darkBorder}`, borderRadius: 6, padding: "6px 10px" }}>{booking.message}</p>
                 </div>
               )}
               {booking.service_notes && (
-                <div className="col-span-2">
-                  <p className="text-gray-500 mb-0.5 font-medium uppercase tracking-wide">Service Notes</p>
-                  <p className="text-gray-900 bg-white border border-gray-200 rounded p-2">{booking.service_notes}</p>
+                <div style={{ gridColumn: "span 2" }}>
+                  <p style={{ color: T.gray400, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Service Notes</p>
+                  <p style={{ color: T.gray900, backgroundColor: T.darkSurface2, border: `1px solid ${T.darkBorder}`, borderRadius: 6, padding: "6px 10px" }}>{booking.service_notes}</p>
                 </div>
               )}
             </div>
@@ -397,163 +483,266 @@ export default function VendorDashboard() {
     );
   };
 
+  // ── STAT CARDS CONFIG ──────────────────────────────────────
+  const statCards = [
+    { icon: Calendar,      accent: "#3B82F6", label: "Total Bookings", value: stats.totalBookings },
+    { icon: TrendingUp,    accent: "#F59E0B", label: "Pending",        value: stats.pendingBookings },
+    { icon: IndianRupee,   accent: "#10B981", label: "Total Revenue",  value: `₹${Number(stats.totalRevenue || 0).toLocaleString("en-IN")}` },
+    { icon: Star,          accent: T.crimson, label: "Avg Rating",     value: (stats.averageRating || 0).toFixed(1) },
+    { icon: MessageSquare, accent: "#EC4899", label: "Total Reviews",  value: reviews.length },
+  ];
+
+  // ── TABS CONFIG ────────────────────────────────────────────
+  const tabs = [
+    { id: "overview",  label: "Overview",  icon: LayoutDashboard },
+    { id: "bookings",  label: "Bookings",  icon: Calendar, badge: stats.pendingBookings },
+    { id: "services",  label: "Services",  icon: Settings },
+    { id: "reviews",   label: "Reviews",   icon: Star },
+    { id: "profile",   label: "Profile",   icon: Users },
+  ];
+
+  // ── MODAL OVERLAY ──────────────────────────────────────────
+  const Overlay = ({ children, onClose }) => (
+    <div style={{
+      position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.75)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16, zIndex: 50, overflowY: "auto",
+    }} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      {children}
+    </div>
+  );
+
+  const ModalCard = ({ children, maxWidth = 448 }) => (
+    <div style={{
+      backgroundColor: T.darkSurface, borderRadius: 12, maxWidth, width: "100%",
+      padding: 24, boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+      border: `1px solid ${T.darkBorder}`,
+    }}>
+      {children}
+    </div>
+  );
+
+  const ModalHeader = ({ icon: Icon, iconBg, iconColor, title, subtitle, onClose }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+      <div style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: iconBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon style={{ width: 20, height: 20, color: iconColor }} />
+      </div>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: T.gray900, margin: 0 }}>{title}</h3>
+        {subtitle && <p style={{ fontSize: 11, color: T.gray600, margin: 0 }}>{subtitle}</p>}
+      </div>
+      <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: T.gray400, padding: 4 }}>
+        <X style={{ width: 18, height: 18 }} />
+      </button>
+    </div>
+  );
+
+  const ModalFooter = ({ onCancel, onConfirm, confirmLabel, confirmStyle, loading }) => (
+    <div style={{ display: "flex", gap: 8 }}>
+      <button onClick={onCancel} style={{ ...btn.outline, flex: 1, justifyContent: "center" }}>Cancel</button>
+      <button onClick={onConfirm} disabled={loading} style={{ ...confirmStyle, flex: 1, justifyContent: "center", opacity: loading ? 0.5 : 1 }}>
+        {loading ? "Please wait..." : confirmLabel}
+      </button>
+    </div>
+  );
+
+  const FormLabel = ({ children, required }) => (
+    <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: T.gray600, marginBottom: 6 }}>
+      {children}{required && <span style={{ color: T.crimson }}> *</span>}
+    </label>
+  );
+
   // ── RENDER ─────────────────────────────────────────────────
   return (
-    <div className="min-h-screen mt-20 bg-gray-50">
+    <div style={{ minHeight: "100vh", marginTop: 80, backgroundColor: T.dark }}>
 
-      {/* Global toast */}
+      {/* Toast */}
       {(success || error) && (
-        <div className={`fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-sm font-medium transition-all ${
-          success ? "bg-green-600 text-white" : "bg-red-600 text-white"
-        }`}>
-          {success ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+        <div style={{
+          position: "fixed", top: 16, right: 16, zIndex: 100,
+          display: "flex", alignItems: "center", gap: 8, padding: "10px 16px",
+          borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+          fontSize: 13, fontWeight: 600, color: T.white,
+          backgroundColor: success ? "#059669" : T.crimson,
+        }}>
+          {success ? <CheckCircle style={{ width: 16, height: 16 }} /> : <AlertCircle style={{ width: 16, height: 16 }} />}
           {success || error}
-          <button onClick={() => { setSuccess(""); setError(""); }}><X className="w-4 h-4" /></button>
+          <button onClick={() => { setSuccess(""); setError(""); }} style={{ background: "none", border: "none", cursor: "pointer", color: T.white, padding: 0 }}>
+            <X style={{ width: 16, height: 16 }} />
+          </button>
         </div>
       )}
 
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-xl font-bold text-red-600">
-                {vendorData?.business_name || "Vendor Dashboard"}
-              </h1>
-              <p className="text-xs text-gray-600 mt-0.5">Manage your services and bookings</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="p-2 hover:bg-gray-100 rounded-lg relative">
-                <Bell className="w-5 h-5 text-gray-600" />
-                {stats.pendingBookings > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
-                    {stats.pendingBookings}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={handleLogoutClick}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm"
-              >
-                <LogOut className="w-4 h-4" /> Logout
-              </button>
-            </div>
+      {/* ── HEADER ── */}
+      <header style={{
+        backgroundColor: T.crimson,
+        borderBottom: `1px solid ${T.crimsonHover}`,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+      }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "12px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: T.white, margin: 0 }}>
+              {vendorData?.business_name || "Vendor Dashboard"}
+            </h1>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", margin: "2px 0 0" }}>Manage your services and bookings</p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button style={{
+              position: "relative", padding: 8, backgroundColor: "rgba(255,255,255,0.15)",
+              border: `1px solid rgba(255,255,255,0.25)`, borderRadius: 8, cursor: "pointer",
+            }}>
+              <Bell style={{ width: 18, height: 18, color: T.white }} />
+              {stats.pendingBookings > 0 && (
+                <span style={{
+                  position: "absolute", top: 4, right: 4, width: 16, height: 16,
+                  backgroundColor: T.dark, borderRadius: "50%", color: T.white,
+                  fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700,
+                }}>{stats.pendingBookings}</span>
+              )}
+            </button>
+            <button onClick={handleLogoutClick} style={{
+              ...btn.primary,
+              backgroundColor: "rgba(0,0,0,0.3)",
+              border: "1px solid rgba(255,255,255,0.25)",
+            }}>
+              <LogOut style={{ width: 15, height: 15 }} /> Logout
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px 24px" }}>
 
-        {/* Stats – Revenue now shows ₹ */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-          {[
-            { icon: Calendar,      color: "blue",   label: "Total Bookings", value: stats.totalBookings },
-            { icon: TrendingUp,    color: "yellow", label: "Pending",        value: stats.pendingBookings },
-            { icon: IndianRupee,   color: "green",  label: "Total Revenue",  value: `₹${Number(stats.totalRevenue || 0).toLocaleString("en-IN")}` },
-            { icon: Star,          color: "red",    label: "Avg Rating",     value: (stats.averageRating || 0).toFixed(1) },
-            { icon: MessageSquare, color: "pink",   label: "Total Reviews",  value: reviews.length },
-          ].map(({ icon: Icon, color, label, value }) => (
-            <div key={label} className={`bg-white rounded-lg shadow-sm p-4 border-t-2 border-${color}-500`}>
-              <div className="flex items-center justify-between mb-1.5">
-                <Icon className={`w-5 h-5 text-${color}-600`} />
-                <span className={`text-xs font-semibold text-${color}-600 bg-${color}-100 px-1.5 py-0.5 rounded uppercase`}>
-                  {label.split(" ")[0]}
-                </span>
+        {/* ── STAT CARDS ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 24 }}>
+          {statCards.map(({ icon: Icon, accent, label, value }) => (
+            <div key={label} style={{
+              backgroundColor: T.darkSurface,
+              borderRadius: 10,
+              padding: 16,
+              borderTop: `3px solid ${accent}`,
+              border: `1px solid ${T.darkBorder}`,
+              borderTopColor: accent,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <Icon style={{ width: 18, height: 18, color: accent }} />
+                <span style={{
+                  fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+                  backgroundColor: `${accent}22`, color: accent,
+                  padding: "2px 8px", borderRadius: 4,
+                }}>{label.split(" ")[0]}</span>
               </div>
-              <p className="text-xl font-bold text-gray-900">{value}</p>
-              <p className="text-xs text-gray-600 mt-0.5">{label}</p>
+              <p style={{ fontSize: 20, fontWeight: 700, color: T.white, margin: 0 }}>{value}</p>
+              <p style={{ fontSize: 11, color: T.gray600, margin: "2px 0 0" }}>{label}</p>
             </div>
           ))}
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm p-1.5 mb-6 flex gap-1 overflow-x-auto border border-gray-200">
-          {[
-            { id: "overview",  label: "Overview",  icon: LayoutDashboard },
-            { id: "bookings",  label: "Bookings",  icon: Calendar, badge: stats.pendingBookings },
-            { id: "services",  label: "Services",  icon: Settings },
-            { id: "reviews",   label: "Reviews",   icon: Star },
-            { id: "profile",   label: "Profile",   icon: Users },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.id ? "bg-red-600 text-white" : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-              {tab.badge > 0 && (
-                <span className={`ml-0.5 w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold ${
-                  activeTab === tab.id ? "bg-white text-red-600" : "bg-red-600 text-white"
-                }`}>{tab.badge}</span>
-              )}
-            </button>
-          ))}
+        {/* ── TABS ── */}
+        <div style={{
+          backgroundColor: T.darkSurface,
+          borderRadius: 10,
+          padding: 6,
+          marginBottom: 20,
+          display: "flex",
+          gap: 4,
+          overflowX: "auto",
+          border: `1px solid ${T.darkBorder}`,
+        }}>
+          {tabs.map((tab) => {
+            const active = activeTab === tab.id;
+            return (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                position: "relative",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "8px 16px",
+                borderRadius: 7,
+                fontSize: 13, fontWeight: 600,
+                cursor: "pointer", border: "none", whiteSpace: "nowrap",
+                backgroundColor: active ? T.crimson : "transparent",
+                color: active ? T.white : T.gray400,
+                transition: "all 0.15s",
+              }}>
+                <tab.icon style={{ width: 15, height: 15 }} />
+                {tab.label}
+                {tab.badge > 0 && (
+                  <span style={{
+                    width: 16, height: 16, borderRadius: "50%", fontSize: 9, fontWeight: 700,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    backgroundColor: active ? T.white : T.crimson,
+                    color: active ? T.crimson : T.white,
+                  }}>{tab.badge}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        {/* ── CONTENT PANEL ── */}
+        <div style={{
+          backgroundColor: T.darkSurface, borderRadius: 10,
+          padding: 24, border: `1px solid ${T.darkBorder}`,
+        }}>
 
-          {/* ── OVERVIEW ── */}
+          {/* OVERVIEW */}
           {activeTab === "overview" && (
             <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Dashboard Overview</h2>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: T.white, marginBottom: 16, marginTop: 0 }}>Dashboard Overview</h2>
 
               {stats.pendingBookings > 0 && (
-                <div className="mb-4 flex items-center gap-3 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                  <div className="flex-1 text-sm">
-                    <span className="font-semibold text-yellow-800">
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  backgroundColor: "#3A2E00", border: "1px solid #92400E",
+                  borderRadius: 8, padding: "12px 16px", marginBottom: 16,
+                }}>
+                  <AlertCircle style={{ width: 18, height: 18, color: "#FCD34D", flexShrink: 0 }} />
+                  <div style={{ flex: 1, fontSize: 13 }}>
+                    <span style={{ fontWeight: 700, color: "#FDE68A" }}>
                       {stats.pendingBookings} booking{stats.pendingBookings > 1 ? "s" : ""} awaiting your response.
                     </span>
-                    <span className="text-yellow-700"> Accept or reject them promptly.</span>
+                    <span style={{ color: "#FCD34D" }}> Accept or reject them promptly.</span>
                   </div>
-                  <button
-                    onClick={() => setActiveTab("bookings")}
-                    className="text-xs bg-yellow-600 text-white px-3 py-1.5 rounded-md hover:bg-yellow-700"
-                  >
-                    View
-                  </button>
+                  <button onClick={() => setActiveTab("bookings")} style={{
+                    ...btn.primary, backgroundColor: "#D97706", fontSize: 11, padding: "5px 12px",
+                  }}>View</button>
                 </div>
               )}
 
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Recent Bookings</h3>
+              <div style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 700, color: T.gray700, marginBottom: 12 }}>Recent Bookings</h3>
                 {bookings.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">No bookings yet</p>
+                  <div style={{ textAlign: "center", padding: "48px 0", backgroundColor: T.darkSurface2, borderRadius: 8 }}>
+                    <Calendar style={{ width: 40, height: 40, color: T.gray400, margin: "0 auto 12px" }} />
+                    <p style={{ color: T.gray600, fontSize: 13 }}>No bookings yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {bookings.slice(0, 5).map((b) => <BookingRow key={b.id} booking={b} showActions />)}
                   </div>
                 )}
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Recent Reviews</h3>
+                <h3 style={{ fontSize: 13, fontWeight: 700, color: T.gray700, marginBottom: 12 }}>Recent Reviews</h3>
                 {reviews.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">No reviews yet</p>
+                  <div style={{ textAlign: "center", padding: "48px 0", backgroundColor: T.darkSurface2, borderRadius: 8 }}>
+                    <Star style={{ width: 40, height: 40, color: T.gray400, margin: "0 auto 12px" }} />
+                    <p style={{ color: T.gray600, fontSize: 13 }}>No reviews yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {reviews.slice(0, 3).map((review) => (
-                      <div key={review.id} className="border border-gray-200 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="font-semibold text-gray-900 text-sm">{review.customer_name}</span>
-                          <div className="flex">
+                      <div key={review.id} style={{ border: `1px solid ${T.darkBorder}`, borderRadius: 8, padding: 12, backgroundColor: T.darkSurface2 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                          <span style={{ fontWeight: 700, color: T.gray900, fontSize: 13 }}>{review.customer_name}</span>
+                          <div style={{ display: "flex" }}>
                             {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`w-3 h-3 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+                              <Star key={i} style={{ width: 12, height: 12, color: i < review.rating ? "#F59E0B" : T.gray200, fill: i < review.rating ? "#F59E0B" : "none" }} />
                             ))}
                           </div>
-                          <span className="text-xs text-gray-400 ml-auto">{review.date}</span>
+                          <span style={{ fontSize: 11, color: T.gray400, marginLeft: "auto" }}>{review.date}</span>
                         </div>
-                        <p className="text-gray-700 text-xs">{review.comment}</p>
+                        <p style={{ color: T.gray700, fontSize: 12, margin: 0 }}>{review.comment}</p>
                       </div>
                     ))}
                   </div>
@@ -562,73 +751,71 @@ export default function VendorDashboard() {
             </div>
           )}
 
-          {/* ── BOOKINGS ── */}
+          {/* BOOKINGS */}
           {activeTab === "bookings" && (
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900">All Bookings</h2>
-                <div className="hidden sm:flex gap-1.5">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: T.white, margin: 0 }}>All Bookings</h2>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {["all", "pending", "approved", "completed", "rejected", "rescheduled", "cancelled"].map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setExpandedBooking(null)}
-                      className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 capitalize"
-                    >
-                      {f}
-                    </button>
+                    <button key={f} onClick={() => setExpandedBooking(null)} style={{
+                      padding: "4px 10px", borderRadius: 999, fontSize: 11, fontWeight: 600,
+                      backgroundColor: T.darkSurface2, color: T.gray600,
+                      border: `1px solid ${T.darkBorder}`, cursor: "pointer", textTransform: "capitalize",
+                    }}>{f}</button>
                   ))}
                 </div>
               </div>
-
               {bookings.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                  <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 text-sm">No bookings yet</p>
+                <div style={{ textAlign: "center", padding: "48px 0", backgroundColor: T.darkSurface2, borderRadius: 8 }}>
+                  <Calendar style={{ width: 40, height: 40, color: T.gray400, margin: "0 auto 12px" }} />
+                  <p style={{ color: T.gray600, fontSize: 13 }}>No bookings yet</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {bookings.map((b) => <BookingRow key={b.id} booking={b} showActions />)}
                 </div>
               )}
             </div>
           )}
 
-          {/* ── SERVICES ── */}
+          {/* SERVICES */}
           {activeTab === "services" && (
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-900">Your Services</h2>
-                <button className="flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-semibold">
-                  <Plus className="w-4 h-4" /> Add Service
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: T.white, margin: 0 }}>Your Services</h2>
+                <button style={{ ...btn.primary }}>
+                  <Plus style={{ width: 15, height: 15 }} /> Add Service
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {services.length === 0 ? (
-                  <div className="col-span-2 text-center py-12 bg-gray-50 rounded-lg">
-                    <Settings className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm mb-3">No services added yet</p>
-                    <button className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-semibold">
-                      Add Your First Service
-                    </button>
+                  <div style={{ gridColumn: "span 2", textAlign: "center", padding: "48px 0", backgroundColor: T.darkSurface2, borderRadius: 8 }}>
+                    <Settings style={{ width: 40, height: 40, color: T.gray400, margin: "0 auto 12px" }} />
+                    <p style={{ color: T.gray600, fontSize: 13, marginBottom: 12 }}>No services added yet</p>
+                    <button style={{ ...btn.primary }}>Add Your First Service</button>
                   </div>
                 ) : (
                   services.map((service) => (
-                    <div key={service.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-all">
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-sm font-bold text-gray-900">{service.name}</h3>
-                        <div className="flex gap-1.5">
-                          <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Edit className="w-4 h-4 text-red-600" /></button>
-                          <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Trash2 className="w-4 h-4 text-red-600" /></button>
+                    <div key={service.id} style={{ border: `1px solid ${T.darkBorder}`, borderRadius: 8, padding: 16, backgroundColor: T.darkSurface2 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: T.gray900 }}>{service.name}</span>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                            <Edit style={{ width: 16, height: 16, color: T.crimson }} />
+                          </button>
+                          <button style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                            <Trash2 style={{ width: 16, height: 16, color: T.crimson }} />
+                          </button>
                         </div>
                       </div>
-                      <p className="text-gray-600 text-xs mb-3">{service.description}</p>
-                      <div className="flex justify-between items-center">
-                        {/* ── ₹ instead of $ ── */}
-                        <span className="text-lg font-bold text-red-600 flex items-center gap-0.5">
-                          <IndianRupee className="w-4 h-4" />
+                      <p style={{ fontSize: 12, color: T.gray600, marginBottom: 12 }}>{service.description}</p>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 17, fontWeight: 700, color: T.crimsonText, display: "flex", alignItems: "center", gap: 2 }}>
+                          <IndianRupee style={{ width: 15, height: 15 }} />
                           {Number(service.price || 0).toLocaleString("en-IN")}
                         </span>
-                        <span className="text-xs text-gray-600">{service.duration}</span>
+                        <span style={{ fontSize: 11, color: T.gray600 }}>{service.duration}</span>
                       </div>
                     </div>
                   ))
@@ -637,31 +824,31 @@ export default function VendorDashboard() {
             </div>
           )}
 
-          {/* ── REVIEWS ── */}
+          {/* REVIEWS */}
           {activeTab === "reviews" && (
             <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Customer Reviews</h2>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: T.white, marginBottom: 16, marginTop: 0 }}>Customer Reviews</h2>
               {reviews.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                  <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 text-sm">No reviews yet</p>
+                <div style={{ textAlign: "center", padding: "48px 0", backgroundColor: T.darkSurface2, borderRadius: 8 }}>
+                  <Star style={{ width: 40, height: 40, color: T.gray400, margin: "0 auto 12px" }} />
+                  <p style={{ color: T.gray600, fontSize: 13 }}>No reviews yet</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {reviews.map((review) => (
-                    <div key={review.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-start justify-between mb-2">
+                    <div key={review.id} style={{ border: `1px solid ${T.darkBorder}`, borderRadius: 8, padding: 16, backgroundColor: T.darkSurface2 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                         <div>
-                          <h4 className="font-semibold text-gray-900 text-sm">{review.customer_name}</h4>
-                          <p className="text-xs text-gray-500">{review.date}</p>
+                          <h4 style={{ fontWeight: 700, color: T.gray900, fontSize: 14, margin: 0 }}>{review.customer_name}</h4>
+                          <p style={{ fontSize: 11, color: T.gray500, margin: 0 }}>{review.date}</p>
                         </div>
-                        <div className="flex">
+                        <div style={{ display: "flex" }}>
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+                            <Star key={i} style={{ width: 15, height: 15, color: i < review.rating ? "#F59E0B" : T.gray200, fill: i < review.rating ? "#F59E0B" : "none" }} />
                           ))}
                         </div>
                       </div>
-                      <p className="text-gray-700 text-xs">{review.comment}</p>
+                      <p style={{ fontSize: 12, color: T.gray700, margin: 0 }}>{review.comment}</p>
                     </div>
                   ))}
                 </div>
@@ -669,12 +856,12 @@ export default function VendorDashboard() {
             </div>
           )}
 
-          {/* ── PROFILE ── */}
+          {/* PROFILE */}
           {activeTab === "profile" && vendorData && (
             <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Business Profile</h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: T.white, marginBottom: 16, marginTop: 0 }}>Business Profile</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   {[
                     ["Business Name", vendorData.business_name],
                     ["Owner Name",    vendorData.owner_name],
@@ -682,14 +869,14 @@ export default function VendorDashboard() {
                     ["Phone",         vendorData.phone],
                   ].map(([label, val]) => (
                     <div key={label}>
-                      <label className="text-xs font-semibold text-gray-600">{label}</label>
-                      <p className="text-gray-900 mt-1 text-sm">{val}</p>
+                      <label style={{ fontSize: 11, fontWeight: 700, color: T.gray600 }}>{label}</label>
+                      <p style={{ color: T.gray900, marginTop: 4, fontSize: 13 }}>{val}</p>
                     </div>
                   ))}
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-600">Address</label>
-                  <p className="text-gray-900 mt-1 text-sm">
+                  <label style={{ fontSize: 11, fontWeight: 700, color: T.gray600 }}>Address</label>
+                  <p style={{ color: T.gray900, marginTop: 4, fontSize: 13 }}>
                     {vendorData.address}, {vendorData.city}, {vendorData.state} {vendorData.zip_code}
                   </p>
                 </div>
@@ -699,11 +886,11 @@ export default function VendorDashboard() {
                   ["Description",      vendorData.description],
                 ].map(([label, val]) => (
                   <div key={label}>
-                    <label className="text-xs font-semibold text-gray-600">{label}</label>
-                    <p className="text-gray-900 mt-1 text-sm">{val}</p>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: T.gray600 }}>{label}</label>
+                    <p style={{ color: T.gray900, marginTop: 4, fontSize: 13 }}>{val}</p>
                   </div>
                 ))}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   {[
                     ["Pricing",           vendorData.pricing],
                     ["Availability",      vendorData.availability || "Not specified"],
@@ -711,17 +898,16 @@ export default function VendorDashboard() {
                     ["Years in Business", `${vendorData.years_in_business} years`],
                   ].map(([label, val]) => (
                     <div key={label}>
-                      <label className="text-xs font-semibold text-gray-600">{label}</label>
-                      <p className="text-gray-900 mt-1 text-sm">{val}</p>
+                      <label style={{ fontSize: 11, fontWeight: 700, color: T.gray600 }}>{label}</label>
+                      <p style={{ color: T.gray900, marginTop: 4, fontSize: 13 }}>{val}</p>
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={handleEditProfile}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-semibold flex items-center gap-1.5"
-                >
-                  <Edit className="w-4 h-4" /> Edit Profile
-                </button>
+                <div>
+                  <button onClick={handleEditProfile} style={{ ...btn.primary }}>
+                    <Edit style={{ width: 15, height: 15 }} /> Edit Profile
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -732,153 +918,132 @@ export default function VendorDashboard() {
 
       {/* Reject Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <XCircle className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-gray-900">Reject Booking</h3>
-                <p className="text-xs text-gray-500">{selectedBooking?.service_name} – {selectedBooking?.customer_name}</p>
-              </div>
-              <button onClick={() => setShowRejectModal(false)} className="ml-auto text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Reason for rejection <span className="text-red-500">*</span>
-              </label>
+        <Overlay onClose={() => setShowRejectModal(false)}>
+          <ModalCard>
+            <ModalHeader
+              icon={XCircle} iconBg={T.crimsonLight} iconColor={T.crimsonText}
+              title="Reject Booking"
+              subtitle={`${selectedBooking?.service_name} – ${selectedBooking?.customer_name}`}
+              onClose={() => setShowRejectModal(false)}
+            />
+            <div style={{ marginBottom: 16 }}>
+              <FormLabel required>Reason for rejection</FormLabel>
               <textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="e.g. Date not available, fully booked, etc."
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                style={textareaStyle}
               />
-              <p className="text-xs text-gray-400 mt-1">This message will be sent to the customer.</p>
+              <p style={{ fontSize: 11, color: T.gray400, marginTop: 4 }}>This message will be sent to the customer.</p>
             </div>
-            {error && <p className="text-xs text-red-600 mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setShowRejectModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold">
-                Cancel
-              </button>
-              <button onClick={handleRejectConfirm} disabled={actionLoading}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold disabled:opacity-50">
-                {actionLoading ? "Rejecting..." : "Confirm Reject"}
-              </button>
-            </div>
-          </div>
-        </div>
+            {error && <p style={{ fontSize: 11, color: T.crimsonText, marginBottom: 10 }}>{error}</p>}
+            <ModalFooter
+              onCancel={() => setShowRejectModal(false)}
+              onConfirm={handleRejectConfirm}
+              confirmLabel="Confirm Reject"
+              confirmStyle={{ ...btn.primary, backgroundColor: T.crimson }}
+              loading={actionLoading}
+            />
+          </ModalCard>
+        </Overlay>
       )}
 
       {/* Reschedule Modal */}
       {showRescheduleModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <RefreshCw className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-gray-900">Reschedule Booking</h3>
-                <p className="text-xs text-gray-500">{selectedBooking?.service_name} – {selectedBooking?.customer_name}</p>
-              </div>
-              <button onClick={() => setShowRescheduleModal(false)} className="ml-auto text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
+        <Overlay onClose={() => setShowRescheduleModal(false)}>
+          <ModalCard>
+            <ModalHeader
+              icon={RefreshCw} iconBg="#0D2340" iconColor="#93C5FD"
+              title="Reschedule Booking"
+              subtitle={`${selectedBooking?.service_name} – ${selectedBooking?.customer_name}`}
+              onClose={() => setShowRescheduleModal(false)}
+            />
+            <div style={{ backgroundColor: T.darkSurface2, borderRadius: 6, padding: "8px 12px", marginBottom: 14, fontSize: 12, color: T.gray600 }}>
+              <span style={{ fontWeight: 700 }}>Current:</span> {selectedBooking?.date} at {selectedBooking?.time}
             </div>
-            <div className="bg-gray-50 rounded-lg px-3 py-2 mb-4 text-xs text-gray-600">
-              <span className="font-medium">Current:</span> {selectedBooking?.date} at {selectedBooking?.time}
-            </div>
-            <div className="space-y-3 mb-4">
-              <div className="grid grid-cols-2 gap-3">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">New Date <span className="text-red-500">*</span></label>
+                  <FormLabel required>New Date</FormLabel>
                   <input type="date" value={rescheduleData.date} min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    style={inputStyle}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">New Time <span className="text-red-500">*</span></label>
+                  <FormLabel required>New Time</FormLabel>
                   <input type="time" value={rescheduleData.time}
                     onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    style={inputStyle}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Reason (optional)</label>
+                <FormLabel>Reason (optional)</FormLabel>
                 <textarea rows={2} value={rescheduleData.reason}
                   onChange={(e) => setRescheduleData({ ...rescheduleData, reason: e.target.value })}
                   placeholder="Let the customer know why you're rescheduling..."
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  style={textareaStyle}
                 />
               </div>
             </div>
-            {error && <p className="text-xs text-red-600 mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setShowRescheduleModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold">
-                Cancel
-              </button>
-              <button onClick={handleRescheduleConfirm} disabled={actionLoading}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold disabled:opacity-50">
-                {actionLoading ? "Sending..." : "Send Reschedule"}
-              </button>
-            </div>
-          </div>
-        </div>
+            {error && <p style={{ fontSize: 11, color: T.crimsonText, marginBottom: 10 }}>{error}</p>}
+            <ModalFooter
+              onCancel={() => setShowRescheduleModal(false)}
+              onConfirm={handleRescheduleConfirm}
+              confirmLabel="Send Reschedule"
+              confirmStyle={{ ...btn.primary, backgroundColor: "#2563EB" }}
+              loading={actionLoading}
+            />
+          </ModalCard>
+        </Overlay>
       )}
 
       {/* Service Notes Modal */}
       {showNotesModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-gray-900">Service Notes</h3>
-                <p className="text-xs text-gray-500">{selectedBooking?.service_name} – {selectedBooking?.customer_name}</p>
-              </div>
-              <button onClick={() => setShowNotesModal(false)} className="ml-auto text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Internal notes for this booking</label>
+        <Overlay onClose={() => setShowNotesModal(false)}>
+          <ModalCard>
+            <ModalHeader
+              icon={FileText} iconBg="#1E1040" iconColor="#C4B5FD"
+              title="Service Notes"
+              subtitle={`${selectedBooking?.service_name} – ${selectedBooking?.customer_name}`}
+              onClose={() => setShowNotesModal(false)}
+            />
+            <div style={{ marginBottom: 16 }}>
+              <FormLabel>Internal notes for this booking</FormLabel>
               <textarea rows={5} value={serviceNote} onChange={(e) => setServiceNote(e.target.value)}
-                placeholder="e.g. Customer wants extra decoration near entrance. Bring backup equipment. Contact florist day before..."
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                placeholder="e.g. Customer wants extra decoration near entrance. Bring backup equipment..."
+                style={textareaStyle}
               />
-              <p className="text-xs text-gray-400 mt-1">These notes are only visible to you.</p>
+              <p style={{ fontSize: 11, color: T.gray400, marginTop: 4 }}>These notes are only visible to you.</p>
             </div>
-            {error && <p className="text-xs text-red-600 mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setShowNotesModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold">
-                Cancel
-              </button>
+            {error && <p style={{ fontSize: 11, color: T.crimsonText, marginBottom: 10 }}>{error}</p>}
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setShowNotesModal(false)} style={{ ...btn.outline, flex: 1, justifyContent: "center" }}>Cancel</button>
               <button onClick={handleNotesSave} disabled={actionLoading}
-                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5">
-                {actionLoading ? "Saving..." : (<><Save className="w-4 h-4" /> Save Notes</>)}
+                style={{ ...btn.primary, backgroundColor: "#7C3AED", flex: 1, justifyContent: "center", opacity: actionLoading ? 0.5 : 1 }}>
+                {actionLoading ? "Saving..." : <><Save style={{ width: 15, height: 15 }} /> Save Notes</>}
               </button>
             </div>
-          </div>
-        </div>
+          </ModalCard>
+        </Overlay>
       )}
 
       {/* Edit Profile Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 my-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Edit Business Profile</h2>
-              <button onClick={() => setShowEditModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-5 h-5" />
+        <Overlay onClose={() => setShowEditModal(false)}>
+          <div style={{
+            backgroundColor: T.darkSurface, borderRadius: 12, maxWidth: 720, width: "100%",
+            maxHeight: "90vh", overflowY: "auto", padding: 24,
+            boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+            border: `1px solid ${T.darkBorder}`,
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: T.white, margin: 0 }}>Edit Business Profile</h2>
+              <button onClick={() => setShowEditModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: T.gray500 }}>
+                <X style={{ width: 18, height: 18 }} />
               </button>
             </div>
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleUpdateProfile} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 {[
                   { name: "businessName", label: "Business Name", type: "text", required: true },
                   { name: "ownerName",    label: "Owner Name",    type: "text", required: true },
@@ -886,102 +1051,83 @@ export default function VendorDashboard() {
                   { name: "pricing",      label: "Pricing Range (₹)", type: "text", required: true, placeholder: "₹5,000 – ₹50,000" },
                 ].map(({ name, label, type, required, placeholder }) => (
                   <div key={name}>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">{label}</label>
+                    <FormLabel required={required}>{label}</FormLabel>
                     <input name={name} type={type} required={required} placeholder={placeholder}
-                      value={editFormData[name]} onChange={handleEditFormChange}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                      value={editFormData[name] || ""} onChange={handleEditFormChange}
+                      style={inputStyle}
                     />
                   </div>
                 ))}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Address</label>
-                <input name="address" type="text" required value={editFormData.address} onChange={handleEditFormChange}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                />
+                <FormLabel required>Address</FormLabel>
+                <input name="address" type="text" required value={editFormData.address || ""} onChange={handleEditFormChange} style={inputStyle} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
                 {["city", "state", "zipCode"].map((name) => (
                   <div key={name}>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 capitalize">
-                      {name === "zipCode" ? "PIN Code" : name}
-                    </label>
-                    <input name={name} type="text" required value={editFormData[name]} onChange={handleEditFormChange}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                    />
+                    <FormLabel required>{name === "zipCode" ? "PIN Code" : name.charAt(0).toUpperCase() + name.slice(1)}</FormLabel>
+                    <input name={name} type="text" required value={editFormData[name] || ""} onChange={handleEditFormChange} style={inputStyle} />
                   </div>
                 ))}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Services Offered</label>
-                <textarea name="servicesOffered" required rows="2" value={editFormData.servicesOffered} onChange={handleEditFormChange}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 resize-none"
-                />
+                <FormLabel required>Services Offered</FormLabel>
+                <textarea name="servicesOffered" required rows={2} value={editFormData.servicesOffered || ""} onChange={handleEditFormChange} style={textareaStyle} />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Business Description</label>
-                <textarea name="description" required rows="3" value={editFormData.description} onChange={handleEditFormChange}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 resize-none"
-                />
+                <FormLabel required>Business Description</FormLabel>
+                <textarea name="description" required rows={3} value={editFormData.description || ""} onChange={handleEditFormChange} style={textareaStyle} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Availability</label>
-                  <input name="availability" type="text" placeholder="Mon–Sat, 9AM–6PM" value={editFormData.availability} onChange={handleEditFormChange}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                  />
+                  <FormLabel>Availability</FormLabel>
+                  <input name="availability" type="text" placeholder="Mon–Sat, 9AM–6PM" value={editFormData.availability || ""} onChange={handleEditFormChange} style={inputStyle} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Website</label>
-                  <input name="website" type="url" placeholder="https://www.example.com" value={editFormData.website} onChange={handleEditFormChange}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                  />
+                  <FormLabel>Website</FormLabel>
+                  <input name="website" type="url" placeholder="https://www.example.com" value={editFormData.website || ""} onChange={handleEditFormChange} style={inputStyle} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Certifications / Licenses</label>
-                <input name="certification" type="text" value={editFormData.certification} onChange={handleEditFormChange}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                />
+                <FormLabel>Certifications / Licenses</FormLabel>
+                <input name="certification" type="text" value={editFormData.certification || ""} onChange={handleEditFormChange} style={inputStyle} />
               </div>
-              {error   && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">{error}</div>}
-              {success && <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-xs">{success}</div>}
-              <div className="flex gap-3 pt-3 border-t">
-                <button type="button" onClick={() => setShowEditModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold">
-                  Cancel
-                </button>
-                <button type="submit" disabled={loading}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5">
-                  {loading ? "Saving..." : (<><Save className="w-4 h-4" /> Save Changes</>)}
+              {error   && <div style={{ backgroundColor: T.crimsonLight, border: `1px solid ${T.crimsonMuted}`, color: T.crimsonText, padding: "8px 12px", borderRadius: 6, fontSize: 12 }}>{error}</div>}
+              {success && <div style={{ backgroundColor: "#052E16", border: "1px solid #065F46", color: "#6EE7B7", padding: "8px 12px", borderRadius: 6, fontSize: 12 }}>{success}</div>}
+              <div style={{ display: "flex", gap: 10, paddingTop: 12, borderTop: `1px solid ${T.darkBorder}` }}>
+                <button type="button" onClick={() => setShowEditModal(false)} style={{ ...btn.outline, flex: 1, justifyContent: "center" }}>Cancel</button>
+                <button type="submit" disabled={loading} style={{ ...btn.primary, flex: 1, justifyContent: "center", opacity: loading ? 0.5 : 1 }}>
+                  {loading ? "Saving..." : <><Save style={{ width: 15, height: 15 }} /> Save Changes</>}
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </Overlay>
       )}
 
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-sm w-full p-6">
-            <div className="text-center mb-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <LogOut className="w-6 h-6 text-yellow-600" />
+        <Overlay onClose={() => setShowLogoutModal(false)}>
+          <ModalCard maxWidth={360}>
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <div style={{
+                width: 48, height: 48, backgroundColor: T.crimsonLight, borderRadius: 10,
+                display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px",
+              }}>
+                <LogOut style={{ width: 22, height: 22, color: T.crimsonText }} />
               </div>
-              <h3 className="text-base font-bold text-gray-900 mb-1.5">Confirm Logout</h3>
-              <p className="text-xs text-gray-600">Are you sure? You'll need to login again to access your dashboard.</p>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: T.white, marginBottom: 6, marginTop: 0 }}>Confirm Logout</h3>
+              <p style={{ fontSize: 12, color: T.gray600, margin: 0 }}>Are you sure? You'll need to login again to access your dashboard.</p>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold">
-                Cancel
-              </button>
-              <button onClick={handleLogoutConfirm} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold flex items-center justify-center gap-1.5">
-                <LogOut className="w-4 h-4" /> Logout
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setShowLogoutModal(false)} style={{ ...btn.outline, flex: 1, justifyContent: "center" }}>Cancel</button>
+              <button onClick={handleLogoutConfirm} style={{ ...btn.primary, flex: 1, justifyContent: "center" }}>
+                <LogOut style={{ width: 15, height: 15 }} /> Logout
               </button>
             </div>
-          </div>
-        </div>
+          </ModalCard>
+        </Overlay>
       )}
     </div>
   );

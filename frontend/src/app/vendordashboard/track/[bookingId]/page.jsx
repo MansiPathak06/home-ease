@@ -12,10 +12,10 @@ import {
 const TrackingMap = dynamic(() => import("@/components/tracking/TrackingMap"), { ssr: false });
 
 const STATUS_STEPS = [
-  { key: "en_route",   label: "Start Journey",       desc: "Begin navigating to customer",  color: "bg-blue-600",   icon: Truck },
-  { key: "arrived",    label: "Mark Arrived",         desc: "You've reached the location",   color: "bg-amber-600",  icon: MapPin },
-  { key: "in_service", label: "Start Service",        desc: "Begin providing the service",   color: "bg-purple-600", icon: Play },
-  { key: "completed",  label: "Complete Service",     desc: "Mark service as done",          color: "bg-green-600",  icon: CheckCircle },
+  { key: "en_route",   label: "Start Journey",       desc: "Begin navigating to customer",  color: "bg-[#C0392B]",        icon: Truck },
+  { key: "arrived",    label: "Mark Arrived",         desc: "You've reached the location",   color: "bg-[#A93226]",        icon: MapPin },
+  { key: "in_service", label: "Start Service",        desc: "Begin providing the service",   color: "bg-[#922B21]",        icon: Play },
+  { key: "completed",  label: "Complete Service",     desc: "Mark service as done",          color: "bg-[#1E8449]",        icon: CheckCircle },
 ];
 
 export default function VendorTracking() {
@@ -110,17 +110,21 @@ export default function VendorTracking() {
   const nextStep = STATUS_STEPS[currentIdx]; // next action available
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <div className="min-h-screen bg-[#1C1C1C] flex flex-col">
       {/* Header */}
-      <div className="bg-gray-900 border-b border-white/10 px-4 py-3 flex items-center gap-3 sticky top-0 z-50">
-        <button onClick={() => router.back()} className="p-1.5 hover:bg-white/10 rounded-lg">
+      <div className="bg-[#C0392B] border-b border-white/10 px-4 py-3 flex items-center gap-3 sticky top-0 z-50">
+        <button onClick={() => router.back()} className="p-1.5 hover:bg-white/20 rounded-lg">
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
         <div className="flex-1">
           <p className="text-white font-bold text-sm">Service Tracking</p>
-          <p className="text-white/50 text-xs">Booking #{bookingId}</p>
+          <p className="text-white/70 text-xs">Booking #{bookingId}</p>
         </div>
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${connected ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+          connected
+            ? "bg-white/20 text-white border border-white/30"
+            : "bg-black/30 text-white/60 border border-white/10"
+        }`}>
           {connected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
           {connected ? "Connected" : "Reconnecting"}
         </div>
@@ -137,7 +141,7 @@ export default function VendorTracking() {
 
         {/* Live badge */}
         {isTracking && (
-          <div className="absolute top-4 right-4 flex items-center gap-2 bg-red-600 rounded-full px-3 py-1.5 shadow-lg z-[400]">
+          <div className="absolute top-4 right-4 flex items-center gap-2 bg-[#C0392B] rounded-full px-3 py-1.5 shadow-lg z-[400] border border-white/20">
             <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
             <span className="text-white text-xs font-bold">LIVE</span>
           </div>
@@ -145,13 +149,13 @@ export default function VendorTracking() {
       </div>
 
       {/* Controls */}
-      <div className="bg-gray-900 rounded-t-3xl -mt-4 relative z-10 border-t border-white/5 p-5 pb-8 space-y-5">
+      <div className="bg-[#232323] rounded-t-3xl -mt-4 relative z-10 border-t border-white/10 p-5 pb-8 space-y-5">
         <div className="w-10 h-1 bg-white/20 rounded-full mx-auto" />
 
         {/* Customer info */}
         {booking && (
-          <div className="flex items-center gap-3 bg-white/5 rounded-2xl p-4 border border-white/10">
-            <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+          <div className="flex items-center gap-3 bg-[#2C2C2C] rounded-2xl p-4 border border-white/10">
+            <div className="w-11 h-11 bg-[#C0392B] rounded-full flex items-center justify-center shadow-md">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
@@ -161,8 +165,8 @@ export default function VendorTracking() {
             </div>
             {booking.customer_phone && (
               <a href={`tel:${booking.customer_phone}`}
-                className="w-9 h-9 bg-green-500/20 border border-green-500/30 rounded-full flex items-center justify-center">
-                <Phone className="w-4 h-4 text-green-400" />
+                className="w-9 h-9 bg-[#C0392B]/20 border border-[#C0392B]/40 rounded-full flex items-center justify-center">
+                <Phone className="w-4 h-4 text-[#E74C3C]" />
               </a>
             )}
           </div>
@@ -172,13 +176,13 @@ export default function VendorTracking() {
         <div className="flex gap-3">
           {!isTracking ? (
             <button onClick={startTracking}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-blue-900/50">
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#C0392B] hover:bg-[#A93226] text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-[#C0392B]/30">
               <Navigation className="w-5 h-5" />
               Start GPS Sharing
             </button>
           ) : (
             <button onClick={stopTracking}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-red-600/20 border border-red-500/30 text-red-400 rounded-2xl font-bold text-sm transition-all">
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[#C0392B]/10 border border-[#C0392B]/40 text-[#E74C3C] rounded-2xl font-bold text-sm transition-all">
               <Square className="w-4 h-4" />
               Stop GPS
             </button>
@@ -186,7 +190,7 @@ export default function VendorTracking() {
         </div>
 
         {locError && (
-          <div className="flex items-center gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5 text-xs">
+          <div className="flex items-center gap-2 text-[#E74C3C] bg-[#C0392B]/10 border border-[#C0392B]/30 rounded-xl px-3 py-2.5 text-xs">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             {locError}
           </div>
@@ -209,14 +213,14 @@ export default function VendorTracking() {
                 onClick={() => isNext && sendStatus(step.key)}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left transition-all ${
                   isCompleted
-                    ? "bg-green-500/10 border border-green-500/20 opacity-60"
+                    ? "bg-[#1E8449]/10 border border-[#1E8449]/25 opacity-60"
                     : isNext
                     ? `${step.color} shadow-lg active:scale-95`
                     : "bg-white/5 border border-white/10 opacity-30 cursor-not-allowed"
                 }`}
               >
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  isCompleted ? "bg-green-500" : isNext ? "bg-white/20" : "bg-white/10"
+                  isCompleted ? "bg-[#1E8449]" : isNext ? "bg-white/20" : "bg-white/10"
                 }`}>
                   {isCompleted
                     ? <CheckCircle className="w-5 h-5 text-white" />
