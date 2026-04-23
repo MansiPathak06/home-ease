@@ -254,6 +254,10 @@ export default function AdminTrackingPanel({ bookings = [] }) {
       {selectedBooking && (
         <FullTrackModal booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
       )}
+      {/* // AdminTrackingPanel.jsx ke end mein ye add karo */}
+
     </div>
+    
   );
 }
+export { FullTrackModal };

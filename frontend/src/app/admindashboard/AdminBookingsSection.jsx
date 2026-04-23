@@ -5,8 +5,9 @@ import {
   Search, Filter, Eye, Edit2, UserCheck, Calendar,
   CheckCircle, XCircle, RefreshCw, IndianRupee, Percent,
   ChevronDown, X, AlertCircle, Clock, Truck, CreditCard,
-  Banknote, TrendingUp, Users, Briefcase
+  Banknote, TrendingUp, Users, Briefcase,Navigation,
 } from "lucide-react";
+import AdminTrackingPanel, { FullTrackModal } from "@/components/admin/AdminTrackingPanel";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const STATUS_STYLES = {
@@ -305,6 +306,7 @@ export default function AdminBookingsSection() {
   const [vendors, setVendors]     = useState([]);
   const [loading, setLoading]     = useState(true);
   const [selected, setSelected]   = useState(null);
+  const [trackingBooking, setTrackingBooking] = useState(null);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -338,6 +340,12 @@ export default function AdminBookingsSection() {
     await api.admin.updateBooking(bookingId, data);
     loadAll();
   };
+  // todayBookings compute karo (bookings state ke baad)
+const todayStr = new Date().toISOString().split("T")[0];
+const todayBookings = bookings.filter((b) => {
+  const bDate = (b.new_date || b.date || "").slice(0, 10);
+  return bDate === todayStr && ["approved", "en_route", "arrived", "in_service"].includes(b.status);
+});
 
   const clearFilters = () =>
     setFilters({ search: "", status: "", vendorId: "", paymentMethod: "", dateFrom: "", dateTo: "" });
@@ -346,6 +354,44 @@ export default function AdminBookingsSection() {
 
   return (
     <div className="space-y-5">
+      {/* ── Aaj Ki Active Bookings Alert ── */}
+{todayBookings.length > 0 && (
+  <div className="space-y-2">
+    <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
+      Aaj ke active vendors — {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long" })}
+    </p>
+    {todayBookings.map((b) => (
+      <div
+        key={b.id}
+        className="flex items-center justify-between bg-[#1a1a1a] border border-orange-800/40 rounded-xl px-4 py-3 cursor-pointer hover:bg-orange-950/30 transition-all"
+        onClick={() => setTrackingBooking(b)}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+            <Truck className="w-4 h-4 text-orange-400" />
+          </div>
+          <div>
+            <p className="text-white text-sm font-bold">
+              {b.vendor_name || "Vendor"} → {b.user_name ?? b.customer_name}
+            </p>
+            <p className="text-zinc-400 text-xs mt-0.5">
+              {b.service_name} · <span className="text-orange-400 font-semibold">{b.new_time || b.time}</span>
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${STATUS_STYLES[b.status] ?? ""}`}>
+            {b.status}
+          </span>
+          <button className="flex items-center gap-1 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-bold transition-colors">
+            <Navigation className="w-3 h-3" /> Track
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
       {/* ── Stats Row ── */}
       {stats && (
@@ -590,6 +636,13 @@ export default function AdminBookingsSection() {
           onSave={() => { setSelected(null); loadAll(); }}
         />
       )}
+      {/* Tracking Modal */}
+{trackingBooking && (
+  <FullTrackModal
+    booking={trackingBooking}
+    onClose={() => setTrackingBooking(null)}
+  />
+)}
     </div>
   );
 }

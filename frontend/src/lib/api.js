@@ -1,111 +1,174 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export const api = {
   // Auth endpoints
+
   auth: {
     login: async (email, password) => {
       const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
       return response.json();
     },
 
     register: async (userData) => {
       const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
       });
       return response.json();
     },
 
     vendorLogin: async (email, password) => {
-  const response = await fetch(`${API_URL}/auth/vendor/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
-  const data = await response.json();
+      const response = await fetch(`${API_URL}/auth/vendor/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
 
-  // 403 = not approved yet — return data so frontend can show the right message
-  if (response.status === 403) {
-    return data;  // ← let handleLoginSubmit handle isApproved: false
-  }
+      // 403 = not approved yet — return data so frontend can show the right message
+      if (response.status === 403) {
+        return data; // ← let handleLoginSubmit handle isApproved: false
+      }
 
-  // 401 = wrong credentials — throw so catch block shows error
-  if (!response.ok) {
-    throw new Error(data.message || 'Login failed');
-  }
+      // 401 = wrong credentials — throw so catch block shows error
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
 
-  return data;
-},
+      return data;
+    },
 
     vendorRegister: async (registerData) => {
       const response = await fetch(`${API_URL}/auth/vendor/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registerData)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registerData),
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
+        throw new Error(errorData.message || "Registration failed");
       }
       return response.json();
+    },
+    forgotPassword: async (email) => {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send OTP');
     }
+    return data;
+  },
+  
+  verifyOTP: async (email, otp) => {
+    const response = await fetch(`${API_URL}/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'OTP verification failed');
+    }
+    return data;
+  },
+  
+  resetPassword: async (email, otp, newPassword) => {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Password reset failed');
+    }
+    return data;
+  },
   },
 
   // Helper to get auth headers
   getAuthHeaders: () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     return {
-      'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : ''
+      "Content-Type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
     };
   },
+
+  reviews: {
+  submit: async (data) => {
+    const response = await fetch(`${API_URL}/reviews/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  getPublic: async () => {
+    const response = await fetch(`${API_URL}/reviews/public`);
+    return response.json();
+  },
+},
 
   // Admin endpoints
   admin: {
     // ── Vendors ──────────────────────────────────────────────────────────────
     getVendors: async () => {
       const response = await fetch(`${API_URL}/admin/vendors`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     approveVendor: async (vendorId) => {
-      const response = await fetch(`${API_URL}/admin/vendors/${vendorId}/approve`, {
-        method: 'POST',
-        headers: api.getAuthHeaders()
-      });
+      const response = await fetch(
+        `${API_URL}/admin/vendors/${vendorId}/approve`,
+        {
+          method: "POST",
+          headers: api.getAuthHeaders(),
+        },
+      );
       return response.json();
     },
     rejectVendor: async (vendorId) => {
-      const response = await fetch(`${API_URL}/admin/vendors/${vendorId}/reject`, {
-        method: 'POST',
-        headers: api.getAuthHeaders()
-      });
+      const response = await fetch(
+        `${API_URL}/admin/vendors/${vendorId}/reject`,
+        {
+          method: "POST",
+          headers: api.getAuthHeaders(),
+        },
+      );
       return response.json();
     },
     deleteVendor: async (vendorId) => {
       const response = await fetch(`${API_URL}/admin/vendors/${vendorId}`, {
-        method: 'DELETE',
-        headers: api.getAuthHeaders()
+        method: "DELETE",
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getVendorStats: async (vendorId) => {
-      const response = await fetch(`${API_URL}/admin/vendors/${vendorId}/stats`, {
-        headers: api.getAuthHeaders()
-      });
+      const response = await fetch(
+        `${API_URL}/admin/vendors/${vendorId}/stats`,
+        {
+          headers: api.getAuthHeaders(),
+        },
+      );
       return response.json();
     },
 
     // ── Users ─────────────────────────────────────────────────────────────────
     getUsers: async () => {
       const response = await fetch(`${API_URL}/admin/users`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
@@ -113,141 +176,182 @@ export const api = {
     // ── Bookings ──────────────────────────────────────────────────────────────
     getBookings: async (filters = {}) => {
       const params = new URLSearchParams();
-      Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, v); });
+      Object.entries(filters).forEach(([k, v]) => {
+        if (v) params.append(k, v);
+      });
       const response = await fetch(`${API_URL}/admin/bookings?${params}`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getBookingStats: async () => {
       const response = await fetch(`${API_URL}/admin/bookings/stats`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getBookingById: async (id) => {
       const response = await fetch(`${API_URL}/admin/bookings/${id}`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     updateBooking: async (id, data) => {
       const response = await fetch(`${API_URL}/admin/bookings/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: api.getAuthHeaders(),
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       return response.json();
     },
     assignVendorToBooking: async (bookingId, vendorId) => {
-      const response = await fetch(`${API_URL}/admin/bookings/${bookingId}/assign-vendor`, {
-        method: 'PUT',
-        headers: api.getAuthHeaders(),
-        body: JSON.stringify({ vendor_id: vendorId })
-      });
+      const response = await fetch(
+        `${API_URL}/admin/bookings/${bookingId}/assign-vendor`,
+        {
+          method: "PUT",
+          headers: api.getAuthHeaders(),
+          body: JSON.stringify({ vendor_id: vendorId }),
+        },
+      );
       return response.json();
     },
     getApprovedVendorsList: async () => {
       const response = await fetch(`${API_URL}/admin/bookings/vendors-list`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     // ─── ADD THIS to your api.admin object in lib/api.js ────────────────────────
-// Place it alongside your existing admin methods
+    // Place it alongside your existing admin methods
 
-getVendorStats: async () => {
-  const response = await fetch(`${API_URL}/admin/vendors/stats`, {
-    headers: api.getAuthHeaders()
-  });
-  return response.json();
-},
+    getVendorStats: async () => {
+      const response = await fetch(`${API_URL}/admin/vendors/stats`, {
+        headers: api.getAuthHeaders(),
+      });
+      return response.json();
+    },
 
-// ─── ADD THESE to your api.admin object in lib/api.js ───────────────────────
+    // ─── ADD THESE to your api.admin object in lib/api.js ───────────────────────
 
-// Section 4 - Payments (no new endpoints needed, reuses getBookings + updateBooking)
-// AdminPaymentsSection uses: api.admin.getBookings(), api.admin.getBookingStats(), api.admin.updateBooking()
-// These already exist. No new API methods needed for Section 4.
+    // Section 4 - Payments (no new endpoints needed, reuses getBookings + updateBooking)
+    // AdminPaymentsSection uses: api.admin.getBookings(), api.admin.getBookingStats(), api.admin.updateBooking()
+    // These already exist. No new API methods needed for Section 4.
 
-// Section 5 - Service Categories (NEW)
-getCategories: async () => {
-  const response = await fetch(`${API_URL}/admin/categories`, {
-    headers: api.getAuthHeaders()
-  });
-  return response.json();
-},
+    // Section 5 - Service Categories (NEW)
+    getCategories: async () => {
+      const response = await fetch(`${API_URL}/admin/categories`, {
+        headers: api.getAuthHeaders(),
+      });
+      return response.json();
+    },
 
-createCategory: async (data) => {
-  const response = await fetch(`${API_URL}/admin/categories`, {
-    method: 'POST',
-    headers: api.getAuthHeaders(),
-    body: JSON.stringify(data)
-  });
-  return response.json();
-},
+    createCategory: async (data) => {
+      const response = await fetch(`${API_URL}/admin/categories`, {
+        method: "POST",
+        headers: api.getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
 
-updateCategory: async (id, data) => {
-  const response = await fetch(`${API_URL}/admin/categories/${id}`, {
-    method: 'PUT',
-    headers: api.getAuthHeaders(),
-    body: JSON.stringify(data)
-  });
-  return response.json();
-},
+    updateCategory: async (id, data) => {
+      const response = await fetch(`${API_URL}/admin/categories/${id}`, {
+        method: "PUT",
+        headers: api.getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
 
-deleteCategory: async (id) => {
-  const response = await fetch(`${API_URL}/admin/categories/${id}`, {
-    method: 'DELETE',
-    headers: api.getAuthHeaders()
-  });
-  return response.json();
-},
+    deleteCategory: async (id) => {
+      const response = await fetch(`${API_URL}/admin/categories/${id}`, {
+        method: "DELETE",
+        headers: api.getAuthHeaders(),
+      });
+      return response.json();
+    },
 
-// ─── ADD THESE to your api.admin object in lib/api.js ───────────────────────
+    // ─── ADD THESE to your api.admin object in lib/api.js ───────────────────────
 
-// Paste these alongside your existing admin methods:
+    // Paste these alongside your existing admin methods:
 
-blockUser: async (userId) => {
-  const response = await fetch(`${API_URL}/admin/users/${userId}/block`, {
-    method: 'PUT',
-    headers: api.getAuthHeaders()
-  });
-  return response.json();
-},
+    blockUser: async (userId) => {
+      const response = await fetch(`${API_URL}/admin/users/${userId}/block`, {
+        method: "PUT",
+        headers: api.getAuthHeaders(),
+      });
+      return response.json();
+    },
 
-unblockUser: async (userId) => {
-  const response = await fetch(`${API_URL}/admin/users/${userId}/unblock`, {
-    method: 'PUT',
-    headers: api.getAuthHeaders()
-  });
-  return response.json();
-},
+    unblockUser: async (userId) => {
+      const response = await fetch(`${API_URL}/admin/users/${userId}/unblock`, {
+        method: "PUT",
+        headers: api.getAuthHeaders(),
+      });
+      return response.json();
+    },
 
-deleteUser: async (userId) => {
-  const response = await fetch(`${API_URL}/admin/users/${userId}`, {
-    method: 'DELETE',
-    headers: api.getAuthHeaders()
-  });
-  return response.json();
-},
+    deleteUser: async (userId) => {
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: api.getAuthHeaders(),
+      });
+      return response.json();
+    },
 
-resetUserPassword: async (userId, newPassword) => {
-  const response = await fetch(`${API_URL}/admin/users/${userId}/reset-password`, {
-    method: 'PUT',
-    headers: api.getAuthHeaders(),
-    body: JSON.stringify({ newPassword })
-  });
-  return response.json();
-},
+    resetUserPassword: async (userId, newPassword) => {
+      const response = await fetch(
+        `${API_URL}/admin/users/${userId}/reset-password`,
+        {
+          method: "PUT",
+          headers: api.getAuthHeaders(),
+          body: JSON.stringify({ newPassword }),
+        },
+      );
+      return response.json();
+    },
 
-// Also rename your existing getBookings to getAllBookings (or add this alias):
-getAllBookings: async (filters = {}) => {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, v); });
-  const response = await fetch(`${API_URL}/admin/bookings?${params}`, {
-    headers: api.getAuthHeaders()
-  });
-  return response.json();
+    // Also rename your existing getBookings to getAllBookings (or add this alias):
+    getAllBookings: async (filters = {}) => {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([k, v]) => {
+        if (v) params.append(k, v);
+      });
+      const response = await fetch(`${API_URL}/admin/bookings?${params}`, {
+        headers: api.getAuthHeaders(),
+      });
+      return response.json();
+    },
+
+    reviews: {
+  getAll: async () => {
+    const response = await fetch(`${API_URL}/reviews/admin`, {
+      headers: api.getAuthHeaders(),
+    });
+    return response.json();
+  },
+  approve: async (id) => {
+    const response = await fetch(`${API_URL}/reviews/admin/${id}/approve`, {
+      method: "PATCH",
+      headers: api.getAuthHeaders(),
+    });
+    return response.json();
+  },
+  delete: async (id) => {
+    const response = await fetch(`${API_URL}/reviews/admin/${id}`, {
+      method: "DELETE",
+      headers: api.getAuthHeaders(),
+    });
+    return response.json();
+  },
+  add: async (data) => {
+    const response = await fetch(`${API_URL}/reviews/admin`, {
+      method: "POST",
+      headers: api.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
 },
   },
 
@@ -255,83 +359,83 @@ getAllBookings: async (filters = {}) => {
   vendor: {
     getProfile: async () => {
       const response = await fetch(`${API_URL}/vendor/profile`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     updateProfile: async (profileData) => {
       const response = await fetch(`${API_URL}/vendor/profile`, {
-        method: 'PUT',
+        method: "PUT",
         headers: api.getAuthHeaders(),
-        body: JSON.stringify(profileData)
+        body: JSON.stringify(profileData),
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to update profile');
+        throw new Error(error.message || "Failed to update profile");
       }
       return response.json();
     },
     getBookings: async () => {
       const response = await fetch(`${API_URL}/vendor/bookings`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getReviews: async () => {
       const response = await fetch(`${API_URL}/vendor/reviews`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getServices: async () => {
       const response = await fetch(`${API_URL}/vendor/services`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getStats: async () => {
       const response = await fetch(`${API_URL}/vendor/stats`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
-    }
+    },
   },
 
   // User endpoints
   user: {
     getProfile: async () => {
       const response = await fetch(`${API_URL}/user/profile`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getBookings: async () => {
       const response = await fetch(`${API_URL}/user/bookings`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     getFavorites: async () => {
       const response = await fetch(`${API_URL}/user/favorites`, {
-        headers: api.getAuthHeaders()
+        headers: api.getAuthHeaders(),
       });
       return response.json();
     },
     addFavorite: async (vendorId) => {
       const response = await fetch(`${API_URL}/user/favorites`, {
-        method: 'POST',
+        method: "POST",
         headers: api.getAuthHeaders(),
-        body: JSON.stringify({ vendorId })
+        body: JSON.stringify({ vendorId }),
       });
       return response.json();
     },
     removeFavorite: async (vendorId) => {
       const response = await fetch(`${API_URL}/user/favorites/${vendorId}`, {
-        method: 'DELETE',
-        headers: api.getAuthHeaders()
+        method: "DELETE",
+        headers: api.getAuthHeaders(),
       });
       return response.json();
-    }
+    },
   },
 
   // Public vendor endpoints
@@ -346,14 +450,12 @@ getAllBookings: async (filters = {}) => {
     },
     search: async (query, category, city, state) => {
       const params = new URLSearchParams();
-      if (query)    params.append('query', query);
-      if (category) params.append('category', category);
-      if (city)     params.append('city', city);
-      if (state)    params.append('state', state);
+      if (query) params.append("query", query);
+      if (category) params.append("category", category);
+      if (city) params.append("city", city);
+      if (state) params.append("state", state);
       const response = await fetch(`${API_URL}/vendors/search?${params}`);
       return response.json();
-    }
-  }
-
-  
+    },
+  },
 };

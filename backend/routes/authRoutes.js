@@ -10,4 +10,9 @@ router.post('/register', authController.registerUser);
 router.post('/vendor/login', authController.loginVendor);
 router.post('/vendor/register', authController.registerVendor);
 
+// Password reset routes (ADD THESE)
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/verify-otp', authController.verifyOTP);
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { testConnection } = require('./config/db');
+const paymentRoutes = require('./routes/paymentRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -22,8 +24,9 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/vendor', require('./routes/vendorRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
+app.use('/api/reviews', reviewRoutes);
 app.use('/api/vendors', require('./routes/vendorPublicRoutes'));
-
+app.use('/api/payment', paymentRoutes);
 // Health check route
 app.get('/api/health', (req, res) => {
   res.json({ 

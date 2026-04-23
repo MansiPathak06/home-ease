@@ -15,7 +15,10 @@ import {
   AlertCircle,
   X,
   Users,
+  Truck
 } from "lucide-react";
+import { Navigation } from "lucide-react";
+import { FullTrackModal } from "@/components/admin/AdminTrackingPanel";
 
 const fmt = (n) =>
   new Intl.NumberFormat("en-IN", {
@@ -284,6 +287,9 @@ export default function AdminVendorSection({ onStatsChange }) {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState({ text: "", type: "" });
+  const [trackingVendorId, setTrackingVendorId] = useState(null);
+const [vendorActiveBooking, setVendorActiveBooking] = useState(null);
+const [loadingBooking, setLoadingBooking] = useState(false);
 
   const showToast = (text, type = "success") => {
     setToast({ text, type });
@@ -329,6 +335,20 @@ export default function AdminVendorSection({ onStatsChange }) {
   useEffect(() => {
     loadVendors();
   }, [loadVendors]);
+  useEffect(() => {
+  if (!trackingVendorId) return;
+  setLoadingBooking(true);
+  api.admin.getBookings({ vendorId: trackingVendorId, status: "en_route" })
+    .then((res) => {
+      // en_route nahi mila toh approved try karo
+      const active = res.bookings?.find((b) =>
+        ["en_route", "arrived", "in_service", "approved"].includes(b.status)
+      );
+      setVendorActiveBooking(active || null);
+    })
+    .catch(() => setVendorActiveBooking(null))
+    .finally(() => setLoadingBooking(false));
+}, [trackingVendorId]);
 
   const handleApprove = async (id) => {
     const res = await api.admin.approveVendor(id);
@@ -621,6 +641,15 @@ export default function AdminVendorSection({ onStatsChange }) {
                   >
                     <Eye className="w-3 h-3" /> View Details
                   </button>
+                  {/* YE NAYA BUTTON ADD KARO — sirf approved vendors ke liye */}
+{vendor.is_approved && (
+  <button
+    onClick={() => setTrackingVendorId(vendor.id)}
+    className="flex-1 py-1.5 bg-orange-600 text-white rounded-md text-xs font-semibold hover:bg-orange-700 flex items-center justify-center gap-1"
+  >
+    <Navigation className="w-3 h-3" /> Track
+  </button>
+)}
                   {!vendor.is_approved && (
                     <button
                       onClick={() => handleApprove(vendor.id)}
@@ -659,6 +688,52 @@ export default function AdminVendorSection({ onStatsChange }) {
           onDelete={handleDelete}
         />
       )}
+      {trackingVendorId && (
+  <div className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
+    <div className="bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-white/10 text-center">
+      {loadingBooking ? (
+        <p className="text-white text-sm">Booking dhundh raha hun...</p>
+      ) : vendorActiveBooking ? (
+        <>
+          <p className="text-white font-bold mb-1">Active Booking Mili!</p>
+          <p className="text-zinc-400 text-xs mb-4">
+            #{vendorActiveBooking.id} · {vendorActiveBooking.service_name} · {vendorActiveBooking.new_time || vendorActiveBooking.time}
+          </p>
+          <button
+            onClick={() => {
+              setTrackingVendorId(null);
+              // FullTrackModal open karo
+              // Ya seedha redirect: router.push(`/admin/track/${vendorActiveBooking.id}`)
+            }}
+            className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-700"
+          >
+            Live Map Dekho
+          </button>
+          <button
+            onClick={() => setTrackingVendorId(null)}
+            className="ml-2 px-4 py-2 bg-zinc-700 text-white rounded-lg text-sm font-bold hover:bg-zinc-600"
+          >
+            Band Karo
+          </button>
+        </>
+      ) : (
+        <>
+          <Truck className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+          <p className="text-white font-semibold mb-1">Koi Active Booking Nahi</p>
+          <p className="text-zinc-400 text-xs mb-4">
+            Is vendor ki abhi koi active/en-route booking nahi hai.
+          </p>
+          <button
+            onClick={() => setTrackingVendorId(null)}
+            className="px-4 py-2 bg-zinc-700 text-white rounded-lg text-sm font-bold"
+          >
+            Theek Hai
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 }

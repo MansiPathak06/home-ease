@@ -1,9 +1,28 @@
 const jwt = require('jsonwebtoken');
 
 // Verify JWT Token
+// const verifyToken = (req, res, next) => {
+//   const authHeader = req.headers['authorization'];
+//   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+//   if (!token) {
+//     return res.status(401).json({ message: 'Access token required' });
+//   }
+
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     req.user = decoded;
+//     next();
+//  } catch (error) {
+//     if (error.name === 'TokenExpiredError') {
+//       return res.status(401).json({ message: 'Token expired, please login again' });
+//     }
+//     return res.status(403).json({ message: 'Invalid token' });
+//   }
+// };
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: 'Access token required' });
@@ -11,9 +30,12 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = {
+      ...decoded,
+      userId: decoded.userId || decoded.id  // ← sirf yeh line add hui
+    };
     next();
- } catch (error) {
+  } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Token expired, please login again' });
     }

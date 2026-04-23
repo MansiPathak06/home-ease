@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle, Clock, Shield } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Clock, Shield, UserCheck } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 export default function HomeEaseHero() {
   const [currentImage, setCurrentImage] = useState(0);
+  const router = useRouter();
 
   const images = [
     {
@@ -41,6 +43,7 @@ export default function HomeEaseHero() {
 
   return (
     <div className="relative h-[100vh] mt-4 overflow-hidden font-sans">
+      
       {/* Background */}
       <div className="absolute inset-0">
         {images.map((image, index) => (
@@ -53,7 +56,6 @@ export default function HomeEaseHero() {
             <img src={image.url} alt={image.alt} className="w-full h-full object-cover" />
           </div>
         ))}
-        {/* Darker overlay to match dark theme */}
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(10,10,10,0.72)' }} />
       </div>
 
@@ -65,6 +67,7 @@ export default function HomeEaseHero() {
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
+
       <button
         onClick={nextImage}
         className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full shadow hover:scale-105 transition"
@@ -79,7 +82,7 @@ export default function HomeEaseHero() {
           <button
             key={index}
             onClick={() => setCurrentImage(index)}
-            className={`h-2 rounded-full transition-all`}
+            className="h-2 rounded-full transition-all"
             style={{
               width: index === currentImage ? '24px' : '8px',
               backgroundColor: index === currentImage ? '#C0392B' : 'rgba(255,255,255,0.35)',
@@ -112,8 +115,8 @@ export default function HomeEaseHero() {
           <div className="flex flex-wrap gap-3">
             {[
               { Icon: CheckCircle, label: 'Verified' },
-              { Icon: Clock,        label: 'Fast Booking' },
-              { Icon: Shield,       label: 'Secure' },
+              { Icon: Clock, label: 'Fast Booking' },
+              { Icon: Shield, label: 'Secure' },
             ].map(({ Icon, label }) => (
               <div
                 key={label}
@@ -126,25 +129,53 @@ export default function HomeEaseHero() {
             ))}
           </div>
 
+          {/* 🔥 Women Professional Highlight (NEW) */}
+          <div
+            className="mt-2 px-4 py-3 rounded-xl flex items-start gap-3 max-w-md"
+            style={{
+              background: 'linear-gradient(135deg, rgba(192,57,43,0.18), rgba(0,0,0,0.4))',
+              border: '1px solid rgba(192,57,43,0.35)',
+            }}
+          >
+            <UserCheck className="w-5 h-5 mt-1" style={{ color: '#C0392B' }} />
+
+            <div className="text-left">
+              <h4 className="text-sm font-semibold text-white">
+                Comfort. Safety. Choice.
+              </h4>
+
+              <p className="text-xs sm:text-sm mt-1" style={{ color: '#c0c0c0' }}>
+                Prefer a woman professional? We’ve got you covered.
+                Choose trained women experts for services where comfort matters the most.
+              </p>
+            </div>
+          </div>
+
           {/* Buttons */}
           <div className="flex gap-3 flex-wrap">
+
             <button
               className="px-5 py-2.5 rounded-lg text-sm font-medium text-white transition"
               style={{ backgroundColor: '#C0392B' }}
+              onClick={() => router.push("/services")}
               onMouseEnter={e => e.currentTarget.style.backgroundColor = '#991b1b'}
               onMouseLeave={e => e.currentTarget.style.backgroundColor = '#C0392B'}
             >
-              Book Service →
+              Explore Services →
             </button>
+
             <button
               className="px-5 py-2.5 rounded-lg text-sm font-medium transition"
               style={{ backgroundColor: '#1e1e1e', color: '#e87c6e', border: '1px solid #C0392B' }}
+              onClick={() => router.push("/about")}
               onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2a2a2a'}
               onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1e1e1e'}
             >
               Learn More
             </button>
+
           </div>
+
         </div>
       </div>
     </div>

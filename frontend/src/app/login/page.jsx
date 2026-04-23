@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, User, Briefcase } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { api } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams(); 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -21,11 +23,16 @@ export default function LoginPage() {
         localStorage.setItem("userType", data.user.role || "user");
         localStorage.setItem("userEmail", data.user.email);
         localStorage.setItem("token", data.token);
-        if (data.user.role === "admin") {
+        // ✅ redirect param check karo
+        const redirect = searchParams.get("redirect");
+         if (data.user.role === "admin") {
           router.push("/admindashboard");
+        } else if (redirect) {
+          router.push(`/${redirect}`);             // ← add
         } else {
           router.push("/userdashboard");
         }
+        
       } else {
         setError(data.message || "Login failed");
       }
@@ -245,7 +252,7 @@ export default function LoginPage() {
                       Remember me
                     </label>
                   </div>
-                  <a href="#" className="text-white font-light"
+                  <a  href="/forgot-password" className="text-white font-light"
                     style={{ fontSize: "11px", opacity: 0.55, textDecoration: "underline" }}>
                     Forgot password?
                   </a>

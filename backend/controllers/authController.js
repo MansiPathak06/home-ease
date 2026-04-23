@@ -6,6 +6,24 @@ const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
+
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
+// Email transporter configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // or your email service
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Generate OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 // USER LOGIN
 exports.loginUser = async (req, res) => {
   try {
@@ -250,5 +268,140 @@ exports.loginVendor = async (req, res) => {
   } catch (error) {
     console.error("Vendor login error:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// FORGOT PASSWORD - Request OTP
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if user exists
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'No account found with this email address' 
+      });
+    }
+
+    const user = result.rows[0];
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    // Store OTP in database
+    await pool.query(
+      'UPDATE users SET reset_otp = $1, reset_otp_expiry = $2 WHERE email = $3',
+      [otp, otpExpiry, email]
+    );
+
+    // Send email with OTP
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset OTP - HomeEase',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #b91c1c;">Password Reset Request</h2>
+          <p>Hello ${user.name || 'User'},</p>
+          <p>You requested to reset your password. Use the following OTP to proceed:</p>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 28px; letter-spacing: 5px; font-weight: bold; border-radius: 5px;">
+            ${otp}
+          </div>
+          <p>This OTP is valid for <strong>15 minutes</strong>.</p>
+          <p>If you didn't request this, please ignore this email.</p>
+          <hr />
+          <p style="color: #666; font-size: 12px;">HomeEase Services - Secure Password Recovery</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({
+      success: true,
+      message: 'OTP sent to your email address',
+      email: email
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error sending OTP. Please try again.' 
+    });
+  }
+};
+
+// VERIFY OTP
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1 AND reset_otp = $2 AND reset_otp_expiry > NOW()',
+      [email, otp]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'OTP verified successfully'
+    });
+
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying OTP'
+    });
+  }
+};
+
+// RESET PASSWORD
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    // Verify OTP again
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1 AND reset_otp = $2 AND reset_otp_expiry > NOW()',
+      [email, otp]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP'
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear OTP fields
+    await pool.query(
+      'UPDATE users SET password = $1, reset_otp = NULL, reset_otp_expiry = NULL WHERE email = $2',
+      [hashedPassword, email]
+    );
+
+    res.json({
+      success: true,
+      message: 'Password reset successful. You can now login with your new password.'
+    });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error resetting password'
+    });
   }
 };
