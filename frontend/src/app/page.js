@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import HeroPage from './HeroPage';
 import ServicesSection from './ServicesSection';
 import HowItWorksSection from './HowItWorksSection';
+import SocietyPartnershipSection from "@/components/SocietyPartnershipSection";
 import Footer from './Footer';
 
 const page = () => {
@@ -12,6 +13,7 @@ const page = () => {
       <HeroPage/>
       <ServicesSection/>
       <HowItWorksSection/>
+      <SocietyPartnershipSection /> 
       
     </div>
   );

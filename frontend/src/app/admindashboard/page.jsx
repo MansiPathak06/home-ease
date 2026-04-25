@@ -132,7 +132,8 @@
 //         ))}
 //       </div>
 
-//       {/* TABS */}
+//       {/* 
+//  */}
 //       <div
 //         className="flex gap-1 mb-4 p-1 rounded-lg overflow-x-auto"
 //         style={{
@@ -194,9 +195,11 @@ import AdminUsersSection      from "./AdminUsersSection";
 import AdminPaymentsSection   from "./AdminPaymentsSection";
 import AdminCategoriesSection from "./AdminCategoriesSection";
 import AdminReviewsSection    from "@/components/admin/AdminReviewsSection"; // ← NEW
+import AdminSocietyLeadsSection from "@/components/admin/AdminSocietyLeadsSection";
+
 import {
   Users, Briefcase, CheckCircle, Calendar,
-  LogOut, Bell, BookOpen, IndianRupee, Tag, Star, // ← Star added
+  LogOut, Bell, BookOpen, IndianRupee, Tag, Star,Building2 // ← Star added
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -238,6 +241,7 @@ export default function AdminDashboard() {
     { key: "payments",   label: "Payments",                        icon: IndianRupee },
     { key: "categories", label: "Categories",                      icon: Tag         },
     { key: "reviews",    label: "Reviews",                         icon: Star        }, // ← NEW
+    { key: "society-leads", label: "Society Leads", icon: Building2 }
   ];
 
   return (
@@ -340,6 +344,8 @@ export default function AdminDashboard() {
           {activeTab === "payments"   && <AdminPaymentsSection />}
           {activeTab === "categories" && <AdminCategoriesSection />}
           {activeTab === "reviews"    && <AdminReviewsSection />}  {/* ← NEW */}
+
+{activeTab === "society-leads" && <AdminSocietyLeadsSection />}
         </div>
       </div>
     </div>

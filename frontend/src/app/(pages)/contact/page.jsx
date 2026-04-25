@@ -34,7 +34,7 @@ export default function ContactPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+        
         .font-playfair { font-family: 'Playfair Display', serif; }
         .font-dm { font-family: 'DM Sans', sans-serif; }
         .glass { backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); }

@@ -8,12 +8,31 @@ import {
   LogIn,
   LayoutDashboard,
   Navigation,
+  ChevronDown,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+const ALL_SERVICES = [
+  "Home Cleaning","Deep Cleaning","Kitchen Cleaning","Bathroom Cleaning",
+  "Sofa Cleaning","Carpet Cleaning","Mattress Cleaning","Pest Control",
+  "Termite Control","Cockroach / Ant Control","Bed Bug Control",
+  "AC Repair & Service","Washing Machine Repair","Refrigerator Repair",
+  "Microwave Repair","TV Repair & Installation","Geyser Repair",
+  "Water Cooler Repair","Electrician","Fan Installation / Repair",
+  "Light & Switch Repair","Inverter / Battery Service","Plumber",
+  "Tap & Faucet Repair","Leakage Repair","Bathroom Fittings Installation",
+  "Water Tank Cleaning","RO / Water Purifier Service","RO Installation",
+  "RO Filter Change","CCTV Installation","Doorbell Installation",
+  "TV Wall Mount Installation","Curtain & Blinds Installation","Carpenter",
+  "Furniture Repair","Modular Kitchen Repair","Wardrobe Repair",
+  "House Painting","Wall Putty & Polish","Home Renovation","Tiles & Flooring",
+  "Packers & Movers","Home Shifting Service","Cook / Chef at Home",
+  "Babysitter / Nanny","Elderly Care","Maid Service","Laptop / Computer Repair",
+  "WiFi / Internet Setup","Printer Repair","Driver on Hire",
+  "Gardening Service","Home Sanitization","Handyman Service",
+];
 
+const styles = `
   .navbar-root {
     font-family: 'DM Sans', system-ui, sans-serif;
   }
@@ -51,6 +70,47 @@ const styles = `
     opacity: 1 !important;
   }
 
+  /* ── Service dropdown ── */
+  .nav-service-input {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .nav-service-input:focus {
+    border-color: #C0392B !important;
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.18) !important;
+    outline: none;
+  }
+  .nav-service-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 9999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a3a transparent;
+  }
+  .nav-service-dropdown::-webkit-scrollbar { width: 4px; }
+  .nav-service-dropdown::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 4px; }
+  .nav-service-option {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #d1d1d1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    border-radius: 8px;
+    margin: 2px 4px;
+  }
+  .nav-service-option:hover,
+  .nav-service-option.highlighted {
+    background: #2a2a2a;
+    color: #C0392B;
+  }
+
   /* ── Icon buttons ── */
   .nav-icon-btn {
     transition: background 0.18s, border-color 0.18s, transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
@@ -61,11 +121,9 @@ const styles = `
     background: #2a2a2a !important;
     border-color: #C0392B !important;
   }
-  .nav-icon-btn:active {
-    transform: scale(0.95);
-  }
+  .nav-icon-btn:active { transform: scale(0.95); }
 
-  /* ── Nav links staggered entrance ── */
+  /* ── Nav links ── */
   .nav-link-item {
     animation: navFadeSlide 0.5s both;
     position: relative;
@@ -81,7 +139,6 @@ const styles = `
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Underline slide */
   .nav-link-item::after {
     content: '';
     position: absolute;
@@ -114,11 +171,8 @@ const styles = `
     box-shadow: 0 8px 24px rgba(192,57,43,0.4);
     background: #991b1b !important;
   }
-  .nav-cta-btn:active {
-    transform: scale(0.97);
-  }
+  .nav-cta-btn:active { transform: scale(0.97); }
 
-  /* Ripple */
   .nav-ripple {
     position: absolute;
     border-radius: 50%;
@@ -131,7 +185,7 @@ const styles = `
     to { transform: scale(5); opacity: 0; }
   }
 
-  /* ── Mobile menu slide ── */
+  /* ── Mobile menu ── */
   .nav-mobile-menu {
     max-height: 0;
     opacity: 0;
@@ -139,11 +193,10 @@ const styles = `
     transition: max-height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.3s ease;
   }
   .nav-mobile-menu.open {
-    max-height: 500px;
+    max-height: 600px;
     opacity: 1;
   }
 
-  /* Mobile nav links */
   .nav-mobile-link {
     transition: background 0.18s, color 0.18s, transform 0.22s ease, padding-left 0.22s ease;
   }
@@ -154,7 +207,6 @@ const styles = `
     padding-left: 18px;
   }
 
-  /* Mobile CTA */
   .nav-mobile-cta {
     transition: background 0.2s, transform 0.22s ease;
   }
@@ -172,31 +224,47 @@ const styles = `
     50%       { opacity: 0.5; transform: scale(1.3); }
   }
 
-  /* ── Scroll shadow transition ── */
+  /* ── Scroll shadow ── */
   .navbar-scrolled {
     box-shadow: 0 2px 20px rgba(192,57,43,0.18), 0 1px 4px rgba(0,0,0,0.3);
   }
 
-  /* ── Logo entrance ── */
   .nav-logo {
     animation: navFadeSlide 0.45s 0s both;
     text-decoration: none;
     display: flex;
     align-items: center;
   }
+
+  /* Search bar divider */
+  .search-divider {
+    width: 1px;
+    height: 20px;
+    background: #3a3a3a;
+    flex-shrink: 0;
+  }
 `;
-
-
 
 export default function Navbar() {
   const router = useRouter();
   const [location, setLocation] = useState("");
+  const [service, setService] = useState("");
+  const [serviceQuery, setServiceQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userType, setUserType] = useState(null);
   const [detecting, setDetecting] = useState(false);
   const [activeLink, setActiveLink] = useState("Home");
   const ctaBtnRef = useRef(null);
+  const serviceRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  // Filtered services based on typed query
+  const filteredServices = ALL_SERVICES.filter((s) =>
+    s.toLowerCase().includes(serviceQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -209,6 +277,20 @@ export default function Navbar() {
     setUserType(type);
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (
+        serviceRef.current && !serviceRef.current.contains(e.target) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const dashboardPath =
     userType === "admin"
       ? "/admindashboard"
@@ -218,10 +300,45 @@ export default function Navbar() {
           ? "/userdashboard"
           : null;
 
-  const handleLocationSearch = (e) => {
-    if (e.key === "Enter" && location.trim()) {
-      router.push(`/services?location=${encodeURIComponent(location.trim())}`);
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (location.trim()) params.set("location", location.trim());
+    if (service.trim()) params.set("service", service.trim());
+    if (params.toString()) {
+      router.push(`/services?${params.toString()}`);
+      setShowDropdown(false);
+      setIsOpen(false);
     }
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") handleSearch();
+  };
+
+  const handleServiceKeyDown = (e) => {
+    if (!showDropdown) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.min(i + 1, filteredServices.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0 && filteredServices[highlightedIndex]) {
+        selectService(filteredServices[highlightedIndex]);
+      } else {
+        handleSearch();
+      }
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+    }
+  };
+
+  const selectService = (s) => {
+    setService(s);
+    setServiceQuery(s);
+    setShowDropdown(false);
+    setHighlightedIndex(-1);
   };
 
   const detectLocation = () => {
@@ -232,7 +349,7 @@ export default function Navbar() {
         try {
           const { latitude, longitude } = pos.coords;
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
           );
           const data = await res.json();
           const city =
@@ -245,7 +362,7 @@ export default function Navbar() {
         } catch (_) {}
         setDetecting(false);
       },
-      () => setDetecting(false),
+      () => setDetecting(false)
     );
   };
 
@@ -280,76 +397,117 @@ export default function Navbar() {
         style={{ backgroundColor: "#111111", borderBottom: "1px solid #2a2a2a" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4">
+          <div className="flex items-center justify-between h-16 gap-3">
 
             {/* ── Logo ── */}
-            <a href="/" className="nav-logo flex items-center gap-3">
-              <img
-                src="/images/logo.png"
-                alt="HomeEase Logo"
-                className="h-20 w-auto"
-              />
+            <a href="/" className="nav-logo flex items-center gap-3 flex-shrink-0">
+              <img src="/images/logo.png" alt="HomeEase Logo" className="h-20 w-auto" />
             </a>
 
-            {/* ── Search bar ── */}
-            <div className="hidden md:flex items-center gap-2 flex-1 max-w-sm">
-              <div className="nav-search-wrap relative flex-1">
-                <span
-                  className="nav-search-pin absolute left-3 top-1/2 -translate-y-1/2"
-                  style={{ color: "#C0392B", opacity: 0.8 }}
-                >
-                  <MapPin className="w-3.5 h-3.5" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Enter city..."
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  onKeyDown={handleLocationSearch}
-                  className="nav-search-input w-full pl-9 pr-3 py-2 text-sm rounded-xl"
-                  style={{
-                    backgroundColor: "#1e1e1e",
-                    border: "1px solid #3a3a3a",
-                    color: "#f0f0f0",
-                  }}
-                />
-              </div>
-
-              <button
-                onClick={() =>
-                  location.trim() &&
-                  router.push(
-                    `/services?location=${encodeURIComponent(location.trim())}`,
-                  )
-                }
-                className="nav-icon-btn w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer"
+            {/* ── Combined Search Bar (Desktop) ── */}
+            <div className="hidden md:flex items-center flex-1 max-w-2xl">
+              <div
+                className="flex items-center flex-1 rounded-xl overflow-visible"
                 style={{
                   backgroundColor: "#1e1e1e",
                   border: "1px solid #3a3a3a",
-                  color: "#C0392B",
+                  height: "38px",
                 }}
               >
-                <Search className="w-3.5 h-3.5" />
-              </button>
+                {/* Location input */}
+                <div className="nav-search-wrap relative flex items-center" style={{ minWidth: "130px", flex: "0 0 140px" }}>
+                  <span
+                    className="nav-search-pin absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ color: "#C0392B", opacity: 0.8 }}
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="City..."
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    className="nav-search-input w-full pl-9 pr-2 py-2 text-sm bg-transparent"
+                    style={{ color: "#f0f0f0", border: "none", outline: "none" }}
+                  />
+                </div>
 
+                {/* Divider */}
+                <div className="search-divider" />
+
+                {/* Service dropdown input */}
+                <div className="relative flex-1" ref={serviceRef}>
+                  <input
+                    type="text"
+                    placeholder="Search service..."
+                    value={serviceQuery}
+                    onChange={(e) => {
+                      setServiceQuery(e.target.value);
+                      setService(e.target.value);
+                      setShowDropdown(true);
+                      setHighlightedIndex(-1);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                    onKeyDown={handleServiceKeyDown}
+                    className="nav-service-input w-full px-3 py-2 text-sm bg-transparent"
+                    style={{ color: "#f0f0f0", border: "none", outline: "none" }}
+                  />
+                  <ChevronDown
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none"
+                    style={{ color: "#6b7280" }}
+                  />
+
+                  {/* Dropdown */}
+                  {showDropdown && filteredServices.length > 0 && (
+                    <div className="nav-service-dropdown" ref={dropdownRef}>
+                      {filteredServices.map((s, i) => (
+                        <div
+                          key={s}
+                          className={`nav-service-option ${i === highlightedIndex ? "highlighted" : ""}`}
+                          onMouseDown={() => selectService(s)}
+                        >
+                          {s}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Search button inside bar */}
+                <button
+                  onClick={handleSearch}
+                  className="flex items-center justify-center px-3 h-full cursor-pointer flex-shrink-0"
+                  style={{
+                    backgroundColor: "#C0392B",
+                    color: "#fff",
+                    borderRadius: "0 10px 10px 0",
+                    transition: "background 0.2s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#991b1b")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "#C0392B")}
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Detect location button */}
               <button
                 onClick={detectLocation}
                 title="Detect location"
-                className="nav-icon-btn w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer"
+                className="nav-icon-btn ml-2 w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer flex-shrink-0"
                 style={{
                   backgroundColor: "#1e1e1e",
                   border: "1px solid #3a3a3a",
                   color: "#C0392B",
                 }}
               >
-                <Navigation
-                  className={`w-3.5 h-3.5 ${detecting ? "nav-detect-pulse" : ""}`}
-                />
+                <Navigation className={`w-3.5 h-3.5 ${detecting ? "nav-detect-pulse" : ""}`} />
               </button>
             </div>
 
             {/* ── Desktop nav links ── */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1 flex-shrink-0">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
@@ -358,9 +516,7 @@ export default function Navbar() {
                   className={`nav-link-item px-3 py-2 text-sm font-medium rounded-lg cursor-pointer ${
                     activeLink === link.name ? "active" : ""
                   }`}
-                  style={{
-                    color: activeLink === link.name ? "#C0392B" : "#d1d1d1",
-                  }}
+                  style={{ color: activeLink === link.name ? "#C0392B" : "#d1d1d1" }}
                 >
                   {link.name}
                 </a>
@@ -399,11 +555,7 @@ export default function Navbar() {
                 color: "#C0392B",
               }}
             >
-              {isOpen ? (
-                <X className="w-4 h-4" />
-              ) : (
-                <Menu className="w-4 h-4" />
-              )}
+              {isOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -414,42 +566,90 @@ export default function Navbar() {
           style={{ borderTop: "1px solid #2a2a2a" }}
         >
           <div className="px-4 py-4 space-y-2" style={{ backgroundColor: "#111111" }}>
-            {/* Mobile search */}
-            <div className="flex gap-2 mb-3">
-              <div className="relative flex-1">
-                <MapPin
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
-                  style={{ color: "#C0392B" }}
-                />
-                <input
-                  type="text"
-                  placeholder="Enter city..."
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  onKeyDown={handleLocationSearch}
-                  className="nav-search-input w-full pl-9 pr-3 py-2 text-sm rounded-xl"
-                  style={{
-                    backgroundColor: "#1e1e1e",
-                    border: "1px solid #3a3a3a",
-                    color: "#f0f0f0",
-                  }}
-                />
-              </div>
+
+            {/* Mobile: Location */}
+            <div className="relative">
+              <MapPin
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
+                style={{ color: "#C0392B" }}
+              />
+              <input
+                type="text"
+                placeholder="Enter city..."
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                className="nav-search-input w-full pl-9 pr-3 py-2 text-sm rounded-xl"
+                style={{
+                  backgroundColor: "#1e1e1e",
+                  border: "1px solid #3a3a3a",
+                  color: "#f0f0f0",
+                }}
+              />
+            </div>
+
+            {/* Mobile: Service */}
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
+                style={{ color: "#C0392B" }}
+              />
+              <input
+                type="text"
+                placeholder="Search service..."
+                value={serviceQuery}
+                onChange={(e) => {
+                  setServiceQuery(e.target.value);
+                  setService(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
+                className="nav-search-input w-full pl-9 pr-3 py-2 text-sm rounded-xl"
+                style={{
+                  backgroundColor: "#1e1e1e",
+                  border: "1px solid #3a3a3a",
+                  color: "#f0f0f0",
+                }}
+              />
+              {showDropdown && filteredServices.length > 0 && (
+                <div className="nav-service-dropdown">
+                  {filteredServices.slice(0, 6).map((s) => (
+                    <div
+                      key={s}
+                      className="nav-service-option"
+                      onMouseDown={() => selectService(s)}
+                    >
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile: Search + Detect buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={handleSearch}
+                className="flex-1 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                style={{ backgroundColor: "#C0392B", color: "#fff" }}
+              >
+                <Search className="w-3.5 h-3.5" />
+                Search
+              </button>
               <button
                 onClick={detectLocation}
-                className="nav-icon-btn w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer"
+                className="nav-icon-btn w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer"
                 style={{
                   backgroundColor: "#1e1e1e",
                   border: "1px solid #3a3a3a",
                   color: "#C0392B",
                 }}
               >
-                <Navigation
-                  className={`w-3.5 h-3.5 ${detecting ? "nav-detect-pulse" : ""}`}
-                />
+                <Navigation className={`w-3.5 h-3.5 ${detecting ? "nav-detect-pulse" : ""}`} />
               </button>
             </div>
 
+            {/* Mobile: Nav links */}
             {navLinks.map((link) => (
               <a
                 key={link.name}

@@ -176,7 +176,7 @@ export default function BookService() {
   if (success) return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background:"#1A1A1A" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap');
+       
         .book-serif{font-family:'DM Serif Display',serif}
         @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
         @keyframes scaleIn{from{opacity:0;transform:scale(0.7)}to{opacity:1;transform:scale(1)}}
@@ -206,7 +206,7 @@ export default function BookService() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
+        
         .book-wrap*,.book-wrap*::before,.book-wrap*::after{box-sizing:border-box}
         .book-wrap{font-family:'DM Sans',sans-serif;min-height:100vh;background:#1A1A1A;padding-top:80px}
         .book-serif{font-family:'DM Serif Display',serif}

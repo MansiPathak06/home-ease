@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const { testConnection } = require('./config/db');
 const paymentRoutes = require('./routes/paymentRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const societyLeadRoutes = require('./routes/societyLeadRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/vendor', require('./routes/vendorRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/vendors', require('./routes/vendorPublicRoutes'));
+app.use('/api/society-leads', societyLeadRoutes);
 app.use('/api/payment', paymentRoutes);
 // Health check route
 app.get('/api/health', (req, res) => {
